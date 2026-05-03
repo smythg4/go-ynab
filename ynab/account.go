@@ -1,0 +1,93 @@
+package ynab
+
+import (
+	"context"
+	"fmt"
+	"net/url"
+	"time"
+
+	"github.com/google/uuid"
+)
+
+type AccountType string
+
+const (
+	AccountTypeChecking       AccountType = "checking"
+	AccountTypeSavings        AccountType = "savings"
+	AccountTypeCash           AccountType = "cash"
+	AccountTypeCreditCard     AccountType = "creditCard"
+	AccountTypeOtherAsset     AccountType = "otherAsset"
+	AccountTypeOtherLiability AccountType = "otherLiability"
+)
+
+type accountData struct {
+	Data struct {
+		Account Account `json:"account"`
+	} `json:"data"`
+}
+
+type accountsData struct {
+	Data struct {
+		Accounts        []Account `json:"accounts"`
+		ServerKnowledge int64     `json:"server_knowledge"`
+	} `json:"data"`
+}
+
+type Account struct {
+	ID                  uuid.UUID   `json:"id"`
+	Name                string      `json:"name"`
+	Type                AccountType `json:"type"`
+	OnBudget            bool        `json:"on_budget"`
+	Closed              bool        `json:"closed"`
+	Note                *string     `json:"note"`
+	Balance             int64       `json:"balance"`
+	ClearedBalance      int64       `json:"cleared_balance"`
+	UnclearedBalance    int64       `json:"uncleared_balance"`
+	TransferPayeeID     *uuid.UUID  `json:"transfer_payee_id"`
+	DirectImportLinked  bool        `json:"direct_import_linked"`
+	DirectImportInError bool        `json:"direct_import_in_error"`
+	LastReconciledAt    *time.Time  `json:"last_reconciled_at"`
+	Deleted             bool        `json:"deleted"`
+}
+
+// GET Methods using accounts
+func (c *Client) GetAccounts(ctx context.Context, planId uuid.UUID, params *ListParams) ([]Account, error) {
+	// TODO: Consider how to return the `ServerKnowledge` retrieved from the query
+	q := url.Values{}
+	if params != nil && params.LastKnowledgeOfServer != nil {
+		q.Set("last_knowledge_of_server", fmt.Sprintf("%d", *params.LastKnowledgeOfServer))
+	}
+	var result accountsData
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/accounts", planId), q, &result); err != nil {
+		return nil, err
+	}
+	return result.Data.Accounts, nil
+}
+
+func (c *Client) GetAccount(ctx context.Context, planId uuid.UUID, accountId uuid.UUID) (*Account, error) {
+	var result accountData
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/accounts/%s", planId, accountId), nil, &result); err != nil {
+		return nil, err
+	}
+	return &result.Data.Account, nil
+}
+
+// POST Methods and infrastructure using accounts
+type SaveAccount struct {
+	Name    string      `json:"name"`
+	Type    AccountType `json:"type"`
+	Balance int64       `json:"balance"`
+}
+
+type SaveAccountWrapper struct {
+	Account SaveAccount `json:"account"`
+}
+
+func (c *Client) CreateAccount(ctx context.Context, planId uuid.UUID, a SaveAccount) (*Account, error) {
+	var result accountData
+	err := c.post(ctx, fmt.Sprintf("plans/%s/accounts", planId), SaveAccountWrapper{a}, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result.Data.Account, nil
+}
