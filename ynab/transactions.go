@@ -21,6 +21,7 @@ type transactionsData struct {
 	} `json:"data"`
 }
 
+// Transaction represents a single YNAB transaction. Amounts are in milliunits (divide by 1000 for display).
 type Transaction struct {
 	ID                   string           `json:"id"`
 	Date                 Date             `json:"date"`
@@ -40,6 +41,7 @@ type Transaction struct {
 	Subtransactions      []Subtransaction `json:"subtransactions"`
 }
 
+// Subtransaction is a line item within a split transaction.
 type Subtransaction struct {
 	ID                    string     `json:"id"`
 	TransactionID         string     `json:"transaction_id"`
@@ -53,6 +55,7 @@ type Subtransaction struct {
 	TransferTransactionID *string    `json:"transfer_transaction_id"`
 }
 
+// ClearedStatus represents the cleared state of a transaction.
 type ClearedStatus string
 
 const (
@@ -61,6 +64,7 @@ const (
 	ClearedStatusReconciled ClearedStatus = "reconciled"
 )
 
+// FlagColor represents the color of a transaction flag.
 type FlagColor string
 
 const (
@@ -85,6 +89,7 @@ type scheduledTransactionsData struct {
 	} `json:"data"`
 }
 
+// ScheduledTransaction represents a recurring scheduled transaction.
 type ScheduledTransaction struct {
 	ID                uuid.UUID                 `json:"id"`
 	DateFirst         Date                      `json:"date_first"`
@@ -104,6 +109,7 @@ type ScheduledTransaction struct {
 	TransferAccountID *uuid.UUID                `json:"transfer_account_id"`
 }
 
+// ScheduledSubtransaction is a line item within a split scheduled transaction.
 type ScheduledSubtransaction struct {
 	ID                     uuid.UUID  `json:"id"`
 	ScheduledTransactionID uuid.UUID  `json:"scheduled_transaction_id"`
@@ -117,6 +123,7 @@ type ScheduledSubtransaction struct {
 	Deleted                bool       `json:"deleted"`
 }
 
+// Frequency represents the recurrence interval for a scheduled transaction.
 type Frequency string
 
 const (
@@ -136,6 +143,9 @@ const (
 )
 
 // GET Methods using transactions
+
+// GetTransactions returns all transactions for a plan. The second return value is the server knowledge
+// for use with delta requests via TransactionListParams.LastKnowledgeOfServer.
 func (c *Client) GetTransactions(ctx context.Context, planId uuid.UUID, params *TransactionListParams) ([]Transaction, int64, error) {
 	q := url.Values{}
 	if params != nil {
@@ -156,6 +166,7 @@ func (c *Client) GetTransactions(ctx context.Context, planId uuid.UUID, params *
 	return result.Data.Transactions, result.Data.ServerKnowledge, nil
 }
 
+// GetTransaction returns a single transaction by ID.
 func (c *Client) GetTransaction(ctx context.Context, planId uuid.UUID, txId string) (*Transaction, error) {
 	var result transactionData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/transactions/%s", planId, txId), nil, &result); err != nil {
@@ -164,6 +175,7 @@ func (c *Client) GetTransaction(ctx context.Context, planId uuid.UUID, txId stri
 	return &result.Data.Transaction, nil
 }
 
+// GetTransactionsByAccount returns all transactions for a specific account.
 func (c *Client) GetTransactionsByAccount(ctx context.Context, planId uuid.UUID, accountId uuid.UUID) ([]Transaction, int64, error) {
 	var result transactionsData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/accounts/%s/transactions", planId, accountId), nil, &result); err != nil {
@@ -172,6 +184,7 @@ func (c *Client) GetTransactionsByAccount(ctx context.Context, planId uuid.UUID,
 	return result.Data.Transactions, result.Data.ServerKnowledge, nil
 }
 
+// GetTransactionsByCategory returns all transactions for a specific category.
 func (c *Client) GetTransactionsByCategory(ctx context.Context, planId uuid.UUID, categoryId uuid.UUID) ([]Transaction, int64, error) {
 	var result transactionsData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/categories/%s/transactions", planId, categoryId), nil, &result); err != nil {
@@ -180,6 +193,7 @@ func (c *Client) GetTransactionsByCategory(ctx context.Context, planId uuid.UUID
 	return result.Data.Transactions, result.Data.ServerKnowledge, nil
 }
 
+// GetTransactionsByPayee returns all transactions for a specific payee.
 func (c *Client) GetTransactionsByPayee(ctx context.Context, planId uuid.UUID, payeeId uuid.UUID) ([]Transaction, int64, error) {
 	var result transactionsData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/payees/%s/transactions", planId, payeeId), nil, &result); err != nil {
@@ -188,6 +202,7 @@ func (c *Client) GetTransactionsByPayee(ctx context.Context, planId uuid.UUID, p
 	return result.Data.Transactions, result.Data.ServerKnowledge, nil
 }
 
+// GetTransactionsByMonth returns all transactions for a specific budget month.
 func (c *Client) GetTransactionsByMonth(ctx context.Context, planId uuid.UUID, month Date) ([]Transaction, int64, error) {
 	var result transactionsData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/months/%s/transactions", planId, month), nil, &result); err != nil {
@@ -196,6 +211,7 @@ func (c *Client) GetTransactionsByMonth(ctx context.Context, planId uuid.UUID, m
 	return result.Data.Transactions, result.Data.ServerKnowledge, nil
 }
 
+// GetScheduledTransactions returns all scheduled transactions for a plan.
 func (c *Client) GetScheduledTransactions(ctx context.Context, planId uuid.UUID) ([]ScheduledTransaction, int64, error) {
 	var result scheduledTransactionsData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/scheduled_transactions", planId), nil, &result); err != nil {
@@ -204,6 +220,7 @@ func (c *Client) GetScheduledTransactions(ctx context.Context, planId uuid.UUID)
 	return result.Data.ScheduledTransactions, result.Data.ServerKnowledge, nil
 }
 
+// GetScheduledTransaction returns a single scheduled transaction by ID.
 func (c *Client) GetScheduledTransaction(ctx context.Context, planId, txId uuid.UUID) (*ScheduledTransaction, error) {
 	var result scheduledTransactionData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/scheduled_transactions/%s", planId, txId), nil, &result); err != nil {
@@ -213,6 +230,8 @@ func (c *Client) GetScheduledTransaction(ctx context.Context, planId, txId uuid.
 }
 
 // POST Methods and infrastructure using transactions
+
+// SaveTransaction is the request body for creating a transaction. Amount is in milliunits.
 type SaveTransaction struct {
 	AccountID  uuid.UUID     `json:"account_id"`
 	Date       Date          `json:"date"`
@@ -239,6 +258,8 @@ type createTransactionResponseData struct {
 	Data CreateTransactionResponse `json:"data"`
 }
 
+// CreateTransactionResponse is returned by CreateTransaction.
+// DuplicateImportIDs contains any ImportIDs that matched existing transactions and were skipped.
 type CreateTransactionResponse struct {
 	TransactionIDs     []string    `json:"transaction_ids"`
 	Transaction        Transaction `json:"transaction"`
@@ -250,6 +271,7 @@ type createTransactionsResponseData struct {
 	Data CreateTransactionsResponse `json:"data"`
 }
 
+// CreateTransactionsResponse is returned by CreateTransactions and UpdateTransactions.
 type CreateTransactionsResponse struct {
 	TransactionIDs     []string      `json:"transaction_ids"`
 	Transactions       []Transaction `json:"transactions"`
@@ -257,6 +279,7 @@ type CreateTransactionsResponse struct {
 	ServerKnowledge    int64         `json:"server_knowledge"`
 }
 
+// CreateTransaction creates a single transaction.
 func (c *Client) CreateTransaction(ctx context.Context, planId uuid.UUID, t SaveTransaction) (*CreateTransactionResponse, error) {
 	var result createTransactionResponseData
 	err := c.post(ctx, fmt.Sprintf("plans/%s/transactions", planId), SaveTransactionWrapper{t}, &result)
@@ -266,6 +289,7 @@ func (c *Client) CreateTransaction(ctx context.Context, planId uuid.UUID, t Save
 	return &result.Data, nil
 }
 
+// CreateTransactions creates multiple transactions in a single request.
 func (c *Client) CreateTransactions(ctx context.Context, planId uuid.UUID, t []SaveTransaction) (*CreateTransactionsResponse, error) {
 	var result createTransactionsResponseData
 	err := c.post(ctx, fmt.Sprintf("plans/%s/transactions", planId), SaveTransactionsWrapper{t}, &result)
@@ -279,11 +303,13 @@ type importTransactionsResponseData struct {
 	Data ImportTransactionsResponse `json:"data"`
 }
 
+// ImportTransactionsResponse is returned by ImportTransactions.
 type ImportTransactionsResponse struct {
 	TransactionIDs  []string `json:"transaction_ids"`
 	ServerKnowledge int64    `json:"server_knowledge"`
 }
 
+// ImportTransactions triggers an import of transactions from linked accounts. Returns the IDs of imported transactions.
 func (c *Client) ImportTransactions(ctx context.Context, planId uuid.UUID) (*ImportTransactionsResponse,
 	error) {
 	var result importTransactionsResponseData
@@ -294,6 +320,7 @@ func (c *Client) ImportTransactions(ctx context.Context, planId uuid.UUID) (*Imp
 	return &result.Data, nil
 }
 
+// SaveScheduledTransaction is the request body for creating or updating a scheduled transaction.
 type SaveScheduledTransaction struct {
 	AccountID  uuid.UUID  `json:"account_id"`
 	Date       Date       `json:"date"`
@@ -310,6 +337,7 @@ type SaveScheduledTransactionWrapper struct {
 	Transaction SaveScheduledTransaction `json:"scheduled_transaction"`
 }
 
+// CreateScheduledTransaction creates a new scheduled transaction.
 func (c *Client) CreateScheduledTransaction(ctx context.Context, planId uuid.UUID, st SaveScheduledTransaction) (*ScheduledTransaction, error) {
 	var result scheduledTransactionData
 	err := c.post(ctx, fmt.Sprintf("plans/%s/scheduled_transactions", planId),
@@ -321,6 +349,8 @@ func (c *Client) CreateScheduledTransaction(ctx context.Context, planId uuid.UUI
 }
 
 // DELETE Methods and infrastructure using transactions
+
+// DeleteTransaction deletes a transaction and returns the deleted transaction.
 func (c *Client) DeleteTransaction(ctx context.Context, planId uuid.UUID, transId string) (*Transaction, error) {
 	var result transactionData
 	err := c.delete(ctx, fmt.Sprintf("plans/%s/transactions/%s", planId, transId), &result)
@@ -330,6 +360,7 @@ func (c *Client) DeleteTransaction(ctx context.Context, planId uuid.UUID, transI
 	return &result.Data.Transaction, nil
 }
 
+// DeleteScheduledTransaction deletes a scheduled transaction and returns the deleted record.
 func (c *Client) DeleteScheduledTransaction(ctx context.Context, planId uuid.UUID, transId uuid.UUID) (*ScheduledTransaction, error) {
 	var result scheduledTransactionData
 	err := c.delete(ctx, fmt.Sprintf("plans/%s/scheduled_transactions/%s", planId, transId), &result)
@@ -340,6 +371,8 @@ func (c *Client) DeleteScheduledTransaction(ctx context.Context, planId uuid.UUI
 }
 
 // PATCH Methods and infrastructure using transactions
+
+// UpdateTransaction is the request body for updating a transaction. ID identifies which transaction to update.
 type UpdateTransaction struct {
 	ID         string        `json:"id"`
 	AccountID  uuid.UUID     `json:"account_id"`
@@ -356,12 +389,13 @@ type UpdateTransaction struct {
 }
 
 type UpdateTransactionsWrapper struct {
-	Transactions []UpdateTransaction `json:"transactions"`
+	Transactions []UpdateTransaction `json:"transaction"`
 }
 type UpdateTransactionWrapper struct {
 	Transactions UpdateTransaction `json:"transactions"`
 }
 
+// UpdateTransactions applies partial updates to multiple transactions (PATCH).
 func (c *Client) UpdateTransactions(ctx context.Context, planId uuid.UUID, t []UpdateTransaction) (*CreateTransactionsResponse, error) {
 	var result createTransactionsResponseData
 	err := c.patch(ctx, fmt.Sprintf("plans/%s/transactions", planId), UpdateTransactionsWrapper{t},
@@ -373,6 +407,8 @@ func (c *Client) UpdateTransactions(ctx context.Context, planId uuid.UUID, t []U
 }
 
 // PUT Methods and infrastructure using transactions
+
+// UpdateTransaction replaces a transaction (PUT). Use UpdateTransactions for partial batch updates.
 func (c *Client) UpdateTransaction(ctx context.Context, planId uuid.UUID, txId string, t UpdateTransaction) (*CreateTransactionResponse, error) {
 	var result createTransactionResponseData
 	err := c.put(ctx, fmt.Sprintf("plans/%s/transactions/%s", planId, txId), UpdateTransactionWrapper{t}, &result)
@@ -382,6 +418,7 @@ func (c *Client) UpdateTransaction(ctx context.Context, planId uuid.UUID, txId s
 	return &result.Data, nil
 }
 
+// UpdateScheduledTransaction replaces a scheduled transaction (PUT).
 func (c *Client) UpdateScheduledTransaction(ctx context.Context, planId uuid.UUID, txId uuid.UUID, t SaveScheduledTransaction) (*ScheduledTransaction, error) {
 	var result scheduledTransactionData
 	err := c.put(ctx, fmt.Sprintf("plans/%s/scheduled_transactions/%s", planId, txId), SaveScheduledTransactionWrapper{t}, &result)

@@ -34,6 +34,7 @@ type categoryGroupData struct {
 	} `json:"data"`
 }
 
+// CategoryGroup represents a group of budget categories.
 type CategoryGroup struct {
 	ID         uuid.UUID  `json:"id"`
 	Name       string     `json:"name"`
@@ -42,6 +43,8 @@ type CategoryGroup struct {
 	Categories []Category `json:"categories"`
 }
 
+// Category represents a single budget category with goal and balance information.
+// Amounts are in milliunits (divide by 1000 for display).
 type Category struct {
 	ID                      uuid.UUID  `json:"id"`
 	CategoryGroupID         uuid.UUID  `json:"category_group_id"`
@@ -81,6 +84,9 @@ const (
 )
 
 // GET Methods using categories
+
+// GetCategories returns all category groups and their categories for a plan.
+// The second return value is server knowledge for delta requests.
 func (c *Client) GetCategories(ctx context.Context, planId uuid.UUID) ([]CategoryGroup, int64, error) {
 	var result categoriesData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/categories", planId), nil, &result); err != nil {
@@ -89,6 +95,7 @@ func (c *Client) GetCategories(ctx context.Context, planId uuid.UUID) ([]Categor
 	return result.Data.CategoryGroups, result.Data.ServerKnowledge, nil
 }
 
+// GetCategory returns a single category by ID.
 func (c *Client) GetCategory(ctx context.Context, planId uuid.UUID, categoryId uuid.UUID) (*Category, error) {
 	var result categoryData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/categories/%s", planId, categoryId), nil, &result); err != nil {
@@ -97,6 +104,7 @@ func (c *Client) GetCategory(ctx context.Context, planId uuid.UUID, categoryId u
 	return &result.Data.Category, nil
 }
 
+// GetCategoryForMonth returns a category's data for a specific budget month.
 func (c *Client) GetCategoryForMonth(ctx context.Context, planId uuid.UUID, month Date, categoryId uuid.UUID) (*Category, error) {
 	var result categoryData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/months/%s/categories/%s", planId, month, categoryId), nil, &result); err != nil {
@@ -106,6 +114,8 @@ func (c *Client) GetCategoryForMonth(ctx context.Context, planId uuid.UUID, mont
 }
 
 // POST Methods and infrastructure using categories
+
+// SaveCategory is the request body for creating or updating a category.
 type SaveCategory struct {
 	CategoryGroupID      uuid.UUID `json:"category_group_id"`
 	Name                 string    `json:"name"`
@@ -119,6 +129,7 @@ type SaveCategoryWrapper struct {
 	Category SaveCategory `json:"category"`
 }
 
+// CreateCategory creates a new category within a category group.
 func (c *Client) CreateCategory(ctx context.Context, planId uuid.UUID, sc SaveCategory) (*Category, error) {
 	var result categoryData
 	err := c.post(ctx, fmt.Sprintf("plans/%s/categories", planId), SaveCategoryWrapper{sc}, &result)
@@ -128,6 +139,7 @@ func (c *Client) CreateCategory(ctx context.Context, planId uuid.UUID, sc SaveCa
 	return &result.Data.Category, nil
 }
 
+// SaveCategoryGroup is the request body for creating or updating a category group.
 type SaveCategoryGroup struct {
 	Name string `json:"name"`
 }
@@ -136,6 +148,7 @@ type SaveCategoryGroupWrapper struct {
 	CategoryGroup SaveCategoryGroup `json:"category_group"`
 }
 
+// CreateCategoryGroup creates a new category group.
 func (c *Client) CreateCategoryGroup(ctx context.Context, planId uuid.UUID, scg SaveCategoryGroup) (*CategoryGroup, error) {
 	var result categoryGroupData
 	err := c.post(ctx, fmt.Sprintf("plans/%s/category_groups", planId), SaveCategoryGroupWrapper{scg}, &result)
@@ -146,6 +159,8 @@ func (c *Client) CreateCategoryGroup(ctx context.Context, planId uuid.UUID, scg 
 }
 
 // PATCH Methods and infrastructure using categories
+
+// UpdateCategory updates an existing category.
 func (c *Client) UpdateCategory(ctx context.Context, planId, categoryId uuid.UUID, sc SaveCategory) (*Category, error) {
 	var result categoryData
 	err := c.patch(ctx, fmt.Sprintf("plans/%s/categories/%s", planId, categoryId), SaveCategoryWrapper{sc}, &result)
@@ -155,6 +170,7 @@ func (c *Client) UpdateCategory(ctx context.Context, planId, categoryId uuid.UUI
 	return &result.Data.Category, nil
 }
 
+// SaveMonthCategory is the request body for updating a category's budget for a specific month.
 type SaveMonthCategory struct {
 	Budgeted int64 `json:"budgeted"`
 }
@@ -163,6 +179,7 @@ type SaveMonthCategoryWrapper struct {
 	Category SaveMonthCategory `json:"category"`
 }
 
+// UpdateCategoryForMonth updates a category's budgeted amount for a specific month.
 func (c *Client) UpdateCategoryForMonth(ctx context.Context, planId uuid.UUID, month Date, categoryId uuid.UUID, smc SaveMonthCategory) (*Category, error) {
 	var result categoryData
 	err := c.patch(ctx, fmt.Sprintf("plans/%s/months/%s/categories/%s", planId, month, categoryId), SaveMonthCategoryWrapper{smc}, &result)
@@ -172,6 +189,7 @@ func (c *Client) UpdateCategoryForMonth(ctx context.Context, planId uuid.UUID, m
 	return &result.Data.Category, nil
 }
 
+// UpdateCategoryGroup updates an existing category group.
 func (c *Client) UpdateCategoryGroup(ctx context.Context, planId, categoryGroupId uuid.UUID, scg SaveCategoryGroup) (*CategoryGroup, error) {
 	var result categoryGroupData
 	err := c.patch(ctx, fmt.Sprintf("plans/%s/category_groups/%s", planId, categoryGroupId), SaveCategoryGroupWrapper{scg}, &result)

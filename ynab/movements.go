@@ -15,6 +15,7 @@ type moneyMovementsData struct {
 	} `json:"data"`
 }
 
+// MoneyMovement represents a single movement of money between categories.
 type MoneyMovement struct {
 	ID                   uuid.UUID  `json:"id"`
 	Month                Date       `json:"month"`
@@ -34,6 +35,7 @@ type moneyMovementGroupData struct {
 	} `json:"data"`
 }
 
+// MoneyMovementGroup represents a group of related money movements.
 type MoneyMovementGroup struct {
 	ID                uuid.UUID  `json:"id"`
 	GroupCreatedAt    time.Time  `json:"group_created_at"`
@@ -43,6 +45,8 @@ type MoneyMovementGroup struct {
 }
 
 // GET Methods using money movements
+
+// GetMoneyMovements returns all money movements for a plan.
 func (c *Client) GetMoneyMovements(ctx context.Context, planId uuid.UUID) ([]MoneyMovement, error) {
 	// TODO: Consider how to return the `ServerKnowledge` retrieved from the query
 	var result moneyMovementsData
@@ -52,6 +56,7 @@ func (c *Client) GetMoneyMovements(ctx context.Context, planId uuid.UUID) ([]Mon
 	return result.Data.MoneyMovements, nil
 }
 
+// GetMoneyMovementsByMonth returns money movements for a specific budget month.
 func (c *Client) GetMoneyMovementsByMonth(ctx context.Context, planId uuid.UUID, month Date) ([]MoneyMovement, int64, error) {
 	var result moneyMovementsData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/months/%s/money_movements", planId, month), nil, &result); err != nil {
@@ -60,6 +65,7 @@ func (c *Client) GetMoneyMovementsByMonth(ctx context.Context, planId uuid.UUID,
 	return result.Data.MoneyMovements, result.Data.ServerKnowledge, nil
 }
 
+// GetMoneyMovementGroups returns all money movement groups for a plan.
 func (c *Client) GetMoneyMovementGroups(ctx context.Context, planId uuid.UUID) ([]MoneyMovementGroup, int64, error) {
 	var result moneyMovementGroupData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/money_movement_groups", planId), nil, &result); err != nil {
@@ -68,6 +74,7 @@ func (c *Client) GetMoneyMovementGroups(ctx context.Context, planId uuid.UUID) (
 	return result.Data.MoneyMovementGroups, result.Data.ServerKnowledge, nil
 }
 
+// GetMoneyMovementGroupsByMonth returns money movement groups for a specific budget month.
 func (c *Client) GetMoneyMovementGroupsByMonth(ctx context.Context, planId uuid.UUID, month Date) ([]MoneyMovementGroup, int64, error) {
 	var result moneyMovementGroupData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/months/%s/money_movement_groups", planId, month), nil, &result); err != nil {

@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+// Date is a date-only value that marshals to and from ISO 8601 format (YYYY-MM-DD).
+// It embeds time.Time for compatibility with standard time operations.
 type Date struct{ time.Time }
 
 func (d Date) String() string {

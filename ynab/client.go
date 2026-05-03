@@ -12,6 +12,7 @@ import (
 	"golang.org/x/time/rate"
 )
 
+// Client is the YNAB API client. Use NewClient to create one.
 type Client struct {
 	baseURL    string
 	apiKey     string
@@ -19,6 +20,8 @@ type Client struct {
 	limiter    *rate.Limiter
 }
 
+// NewClient returns a new Client with the given Personal Access Token.
+// The client has a 15-second request timeout by default.
 func NewClient(apiKey string) *Client {
 	return &Client{
 		baseURL: "https://api.ynab.com/v1",
@@ -29,9 +32,19 @@ func NewClient(apiKey string) *Client {
 	}
 }
 
+// WithRateLimit configures a token bucket rate limiter on the client.
+// The YNAB API allows 200 requests per hour. Example:
+//
+//	client := ynab.NewClient(apiKey).WithRateLimit(200, 10)
 func (c *Client) WithRateLimit(requestsPerHour, burstVolume int) *Client {
 	interval := time.Hour / time.Duration(requestsPerHour)
 	c.limiter = rate.NewLimiter(rate.Every(interval), burstVolume)
+	return c
+}
+
+// WithTimeout sets the HTTP client timeout in seconds. Defaults to 15 seconds.
+func (c *Client) WithTimeout(timeoutSeconds int) *Client {
+	c.httpClient = &http.Client{Timeout: time.Duration(timeoutSeconds) * time.Second}
 	return c
 }
 
@@ -94,7 +107,7 @@ func (c *Client) post(ctx context.Context, endpoint string, payload any, out any
 	}
 	defer res.Body.Close()
 
-	if res.StatusCode != http.StatusCreated {
+	if res.StatusCode != http.StatusCreated && res.StatusCode != http.StatusOK {
 		var apiErr ErrorData
 		if err := json.NewDecoder(res.Body).Decode(&apiErr); err != nil {
 			return fmt.Errorf("request failed with status %d", res.StatusCode)

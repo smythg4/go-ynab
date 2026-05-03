@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// AccountType represents the type of a YNAB account.
 type AccountType string
 
 const (
@@ -33,6 +34,7 @@ type accountsData struct {
 	} `json:"data"`
 }
 
+// Account represents a YNAB account such as checking, savings, or credit card.
 type Account struct {
 	ID                  uuid.UUID   `json:"id"`
 	Name                string      `json:"name"`
@@ -51,8 +53,8 @@ type Account struct {
 }
 
 // GET Methods using accounts
-// / Returns all accounts for a given plan id. Accepts List Parameters
-// / to support delta requests
+
+// GetAccounts returns all accounts for a plan. The second return value is server knowledge for delta requests.
 func (c *Client) GetAccounts(ctx context.Context, planId uuid.UUID, params *ListParams) ([]Account, int64, error) {
 	q := url.Values{}
 	if params != nil && params.LastKnowledgeOfServer != nil {
@@ -65,7 +67,7 @@ func (c *Client) GetAccounts(ctx context.Context, planId uuid.UUID, params *List
 	return result.Data.Accounts, result.Data.ServerKnowledge, nil
 }
 
-// / Returns a single account for a given plan and account id.
+// GetAccount returns a single account by ID.
 func (c *Client) GetAccount(ctx context.Context, planId uuid.UUID, accountId uuid.UUID) (*Account, error) {
 	var result accountData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/accounts/%s", planId, accountId), nil, &result); err != nil {
@@ -75,6 +77,8 @@ func (c *Client) GetAccount(ctx context.Context, planId uuid.UUID, accountId uui
 }
 
 // POST Methods and infrastructure using accounts
+
+// SaveAccount is the request body for creating a new account.
 type SaveAccount struct {
 	Name    string      `json:"name"`
 	Type    AccountType `json:"type"`
@@ -85,7 +89,7 @@ type SaveAccountWrapper struct {
 	Account SaveAccount `json:"account"`
 }
 
-// /Creates a new account for a given plan id
+// CreateAccount creates a new account for a plan.
 func (c *Client) CreateAccount(ctx context.Context, planId uuid.UUID, a SaveAccount) (*Account, error) {
 	var result accountData
 	err := c.post(ctx, fmt.Sprintf("plans/%s/accounts", planId), SaveAccountWrapper{a}, &result)

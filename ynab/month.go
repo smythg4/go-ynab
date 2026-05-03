@@ -20,6 +20,7 @@ type monthsData struct {
 	} `json:"data"`
 }
 
+// Month represents a budget month, including all category allocations and activity.
 type Month struct {
 	Month        Date       `json:"month"`
 	Note         *string    `json:"note"`
@@ -33,6 +34,8 @@ type Month struct {
 }
 
 // GET Methods using months
+
+// GetMonths returns all budget months for a plan.
 func (c *Client) GetMonths(ctx context.Context, planId uuid.UUID) ([]Month, int64, error) {
 	var result monthsData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/months", planId), nil, &result); err != nil {
@@ -41,6 +44,7 @@ func (c *Client) GetMonths(ctx context.Context, planId uuid.UUID) ([]Month, int6
 	return result.Data.Months, result.Data.ServerKnowledge, nil
 }
 
+// GetMonth returns a single budget month including its category details.
 func (c *Client) GetMonth(ctx context.Context, planId uuid.UUID, month Date) (*Month, error) {
 	var result monthData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/months/%s", planId, month), nil, &result); err != nil {
