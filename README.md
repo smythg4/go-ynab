@@ -133,7 +133,6 @@ Available error types: `ErrUnauthorized`, `ErrForbidden`, `ErrNotFound`, `ErrRat
 | `GetTransactionsByMonth` | `GET /plans/{plan_id}/months/{month}/transactions` |
 | `CreateTransaction` | `POST /plans/{plan_id}/transactions` |
 | `CreateTransactions` | `POST /plans/{plan_id}/transactions` |
-| `CreateScheduledTransaction` | `POST /plans/{plan_id}/scheduled_transactions` |
 | `UpdateTransaction` | `PUT /plans/{plan_id}/transactions/{transaction_id}` |
 | `UpdateTransactions` | `PATCH /plans/{plan_id}/transactions` |
 | `DeleteTransaction` | `DELETE /plans/{plan_id}/transactions/{transaction_id}` |
