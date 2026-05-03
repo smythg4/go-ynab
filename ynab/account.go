@@ -51,19 +51,21 @@ type Account struct {
 }
 
 // GET Methods using accounts
-func (c *Client) GetAccounts(ctx context.Context, planId uuid.UUID, params *ListParams) ([]Account, error) {
-	// TODO: Consider how to return the `ServerKnowledge` retrieved from the query
+// / Returns all accounts for a given plan id. Accepts List Parameters
+// / to support delta requests
+func (c *Client) GetAccounts(ctx context.Context, planId uuid.UUID, params *ListParams) ([]Account, int64, error) {
 	q := url.Values{}
 	if params != nil && params.LastKnowledgeOfServer != nil {
 		q.Set("last_knowledge_of_server", fmt.Sprintf("%d", *params.LastKnowledgeOfServer))
 	}
 	var result accountsData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/accounts", planId), q, &result); err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return result.Data.Accounts, nil
+	return result.Data.Accounts, result.Data.ServerKnowledge, nil
 }
 
+// / Returns a single account for a given plan and account id.
 func (c *Client) GetAccount(ctx context.Context, planId uuid.UUID, accountId uuid.UUID) (*Account, error) {
 	var result accountData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/accounts/%s", planId, accountId), nil, &result); err != nil {
@@ -83,6 +85,7 @@ type SaveAccountWrapper struct {
 	Account SaveAccount `json:"account"`
 }
 
+// /Creates a new account for a given plan id
 func (c *Client) CreateAccount(ctx context.Context, planId uuid.UUID, a SaveAccount) (*Account, error) {
 	var result accountData
 	err := c.post(ctx, fmt.Sprintf("plans/%s/accounts", planId), SaveAccountWrapper{a}, &result)

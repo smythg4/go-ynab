@@ -136,8 +136,7 @@ const (
 )
 
 // GET Methods using transactions
-func (c *Client) GetTransactions(ctx context.Context, planId uuid.UUID, params *TransactionListParams) ([]Transaction, error) {
-	// TODO: Consider how to return the `ServerKnowledge` retrieved from the query
+func (c *Client) GetTransactions(ctx context.Context, planId uuid.UUID, params *TransactionListParams) ([]Transaction, int64, error) {
 	q := url.Values{}
 	if params != nil {
 		if params.SinceDate != nil {
@@ -152,9 +151,9 @@ func (c *Client) GetTransactions(ctx context.Context, planId uuid.UUID, params *
 	}
 	var result transactionsData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/transactions", planId), q, &result); err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return result.Data.Transactions, nil
+	return result.Data.Transactions, result.Data.ServerKnowledge, nil
 }
 
 func (c *Client) GetTransaction(ctx context.Context, planId uuid.UUID, txId string) (*Transaction, error) {
@@ -165,49 +164,44 @@ func (c *Client) GetTransaction(ctx context.Context, planId uuid.UUID, txId stri
 	return &result.Data.Transaction, nil
 }
 
-func (c *Client) GetTransactionsByAccount(ctx context.Context, planId uuid.UUID, accountId uuid.UUID) ([]Transaction, error) {
-	// TODO: Consider how to return the `ServerKnowledge` retrieved from the query
+func (c *Client) GetTransactionsByAccount(ctx context.Context, planId uuid.UUID, accountId uuid.UUID) ([]Transaction, int64, error) {
 	var result transactionsData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/accounts/%s/transactions", planId, accountId), nil, &result); err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return result.Data.Transactions, nil
+	return result.Data.Transactions, result.Data.ServerKnowledge, nil
 }
 
-func (c *Client) GetTransactionsByCategory(ctx context.Context, planId uuid.UUID, categoryId uuid.UUID) ([]Transaction, error) {
-	// TODO: Consider how to return the `ServerKnowledge` retrieved from the query
+func (c *Client) GetTransactionsByCategory(ctx context.Context, planId uuid.UUID, categoryId uuid.UUID) ([]Transaction, int64, error) {
 	var result transactionsData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/categories/%s/transactions", planId, categoryId), nil, &result); err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return result.Data.Transactions, nil
+	return result.Data.Transactions, result.Data.ServerKnowledge, nil
 }
 
-func (c *Client) GetTransactionsByPayee(ctx context.Context, planId uuid.UUID, payeeId uuid.UUID) ([]Transaction, error) {
-	// TODO: Consider how to return the `ServerKnowledge` retrieved from the query
+func (c *Client) GetTransactionsByPayee(ctx context.Context, planId uuid.UUID, payeeId uuid.UUID) ([]Transaction, int64, error) {
 	var result transactionsData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/payees/%s/transactions", planId, payeeId), nil, &result); err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return result.Data.Transactions, nil
+	return result.Data.Transactions, result.Data.ServerKnowledge, nil
 }
 
-func (c *Client) GetTransactionsByMonth(ctx context.Context, planId uuid.UUID, month Date) ([]Transaction, error) {
-	// TODO: Consider how to return the `ServerKnowledge` retrieved from the query
+func (c *Client) GetTransactionsByMonth(ctx context.Context, planId uuid.UUID, month Date) ([]Transaction, int64, error) {
 	var result transactionsData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/months/%s/transactions", planId, month), nil, &result); err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return result.Data.Transactions, nil
+	return result.Data.Transactions, result.Data.ServerKnowledge, nil
 }
 
-func (c *Client) GetScheduledTransactions(ctx context.Context, planId uuid.UUID) ([]ScheduledTransaction, error) {
-	// TODO: Consider how to return the `ServerKnowledge` retrieved from the query
+func (c *Client) GetScheduledTransactions(ctx context.Context, planId uuid.UUID) ([]ScheduledTransaction, int64, error) {
 	var result scheduledTransactionsData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/scheduled_transactions", planId), nil, &result); err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return result.Data.ScheduledTransactions, nil
+	return result.Data.ScheduledTransactions, result.Data.ServerKnowledge, nil
 }
 
 func (c *Client) GetScheduledTransaction(ctx context.Context, planId, txId uuid.UUID) (*ScheduledTransaction, error) {

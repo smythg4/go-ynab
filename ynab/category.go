@@ -81,13 +81,12 @@ const (
 )
 
 // GET Methods using categories
-func (c *Client) GetCategories(ctx context.Context, planId uuid.UUID) ([]CategoryGroup, error) {
-	// TODO: Consider how to return the `ServerKnowledge` retrieved from the query
+func (c *Client) GetCategories(ctx context.Context, planId uuid.UUID) ([]CategoryGroup, int64, error) {
 	var result categoriesData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/categories", planId), nil, &result); err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return result.Data.CategoryGroups, nil
+	return result.Data.CategoryGroups, result.Data.ServerKnowledge, nil
 }
 
 func (c *Client) GetCategory(ctx context.Context, planId uuid.UUID, categoryId uuid.UUID) (*Category, error) {

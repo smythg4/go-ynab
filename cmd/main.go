@@ -41,7 +41,7 @@ func main() {
 		log.Panicln(err)
 	}
 
-	accounts, err := client.GetAccounts(ctx, pid, nil)
+	accounts, _, err := client.GetAccounts(ctx, pid, nil)
 
 	if err != nil {
 		log.Panicln(err)
@@ -55,7 +55,7 @@ func main() {
 		log.Panicln(err)
 	}
 
-	payees, err := client.GetPayees(ctx, pid)
+	payees, _, err := client.GetPayees(ctx, pid)
 	if err != nil {
 		log.Panicln(err)
 	}

@@ -33,13 +33,12 @@ type Month struct {
 }
 
 // GET Methods using months
-func (c *Client) GetMonths(ctx context.Context, planId uuid.UUID) ([]Month, error) {
-	// TODO: Consider how to return the `ServerKnowledge` retrieved from the query
+func (c *Client) GetMonths(ctx context.Context, planId uuid.UUID) ([]Month, int64, error) {
 	var result monthsData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/months", planId), nil, &result); err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return result.Data.Months, nil
+	return result.Data.Months, result.Data.ServerKnowledge, nil
 }
 
 func (c *Client) GetMonth(ctx context.Context, planId uuid.UUID, month Date) (*Month, error) {

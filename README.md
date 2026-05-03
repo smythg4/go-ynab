@@ -1,6 +1,6 @@
 # ynab-go
 
-A Go client for the [YNAB API](https://api.ynab.com). Requires a YNAB account and a [Personal Access Token](https://app.ynab.com/settings/developer).
+A Go client for the [YNAB API](https://api.ynab.com). Supports full access  to all published YNAB API endpoints. Requires a YNAB account and a [Personal Access Token](https://app.ynab.com/settings/developer).
 
 ## Installation
 
@@ -15,7 +15,7 @@ go get github.com/smythg4/go-ynab
 All API access requires a Personal Access Token. Pass it to `NewClient`:
 
 ```go
-client := ynab.NewClient(os.Getenv("YNAB_API_KEY"))
+client := ynab.NewClient(os.Getenv("YNAB_TOKEN"))
 ```
 
 ### Quick Start
@@ -32,7 +32,7 @@ import (
 )
 
 func main() {
-    client := ynab.NewClient(os.Getenv("YNAB_API_KEY"))
+    client := ynab.NewClient(os.Getenv("YNAB_TOKEN"))
 
     plans, err := client.GetPlans(context.Background())
     if err != nil {

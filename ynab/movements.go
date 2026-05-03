@@ -52,29 +52,26 @@ func (c *Client) GetMoneyMovements(ctx context.Context, planId uuid.UUID) ([]Mon
 	return result.Data.MoneyMovements, nil
 }
 
-func (c *Client) GetMoneyMovementsByMonth(ctx context.Context, planId uuid.UUID, month Date) ([]MoneyMovement, error) {
-	// TODO: Consider how to return the `ServerKnowledge` retrieved from the query
+func (c *Client) GetMoneyMovementsByMonth(ctx context.Context, planId uuid.UUID, month Date) ([]MoneyMovement, int64, error) {
 	var result moneyMovementsData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/months/%s/money_movements", planId, month), nil, &result); err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return result.Data.MoneyMovements, nil
+	return result.Data.MoneyMovements, result.Data.ServerKnowledge, nil
 }
 
-func (c *Client) GetMoneyMovementGroups(ctx context.Context, planId uuid.UUID) ([]MoneyMovementGroup, error) {
-	// TODO: Consider how to return the `ServerKnowledge` retrieved from the query
+func (c *Client) GetMoneyMovementGroups(ctx context.Context, planId uuid.UUID) ([]MoneyMovementGroup, int64, error) {
 	var result moneyMovementGroupData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/money_movement_groups", planId), nil, &result); err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return result.Data.MoneyMovementGroups, nil
+	return result.Data.MoneyMovementGroups, result.Data.ServerKnowledge, nil
 }
 
-func (c *Client) GetMoneyMovementGroupsByMonth(ctx context.Context, planId uuid.UUID, month Date) ([]MoneyMovementGroup, error) {
-	// TODO: Consider how to return the `ServerKnowledge` retrieved from the query
+func (c *Client) GetMoneyMovementGroupsByMonth(ctx context.Context, planId uuid.UUID, month Date) ([]MoneyMovementGroup, int64, error) {
 	var result moneyMovementGroupData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/months/%s/money_movement_groups", planId, month), nil, &result); err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return result.Data.MoneyMovementGroups, nil
+	return result.Data.MoneyMovementGroups, result.Data.ServerKnowledge, nil
 }

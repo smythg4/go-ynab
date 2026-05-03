@@ -48,13 +48,12 @@ type PayeeLocation struct {
 }
 
 // GET Methods using payees
-func (c *Client) GetPayees(ctx context.Context, planId uuid.UUID) ([]Payee, error) {
-	// TODO: Consider how to return the `ServerKnowledge` retrieved from the query
+func (c *Client) GetPayees(ctx context.Context, planId uuid.UUID) ([]Payee, int64, error) {
 	var result payeesData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/payees", planId), nil, &result); err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return result.Data.Payees, nil
+	return result.Data.Payees, result.Data.ServerKnowledge, nil
 }
 
 func (c *Client) GetPayee(ctx context.Context, planId, payeeId uuid.UUID) (*Payee, error) {
