@@ -160,6 +160,13 @@ Available error types: `ErrUnauthorized`, `ErrForbidden`, `ErrNotFound`, `ErrRat
 |--------|----------|
 | `GetUser` | `GET /user` |
 
----
+## Test Coverage
+
+Unit tests cover all GET endpoints, client configuration, error type dispatch, and auth header injection. Write operations (POST, PATCH, PUT, DELETE) are pending a testutil redesign to capture HTTP method and request body.
+
+Run the suite with:
+```
+go test ./ynab/...
+```
 
 Not affiliated with YNAB. [YNAB API Terms of Service](https://api.ynab.com/#terms).

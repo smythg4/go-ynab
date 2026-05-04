@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-type ErrorData struct {
+type errorData struct {
 	Error APIError `json:"error"`
 }
 

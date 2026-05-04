@@ -12,10 +12,20 @@ import (
 	"golang.org/x/time/rate"
 )
 
+type authTransport struct {
+	apiKey string
+	base   http.RoundTripper
+}
+
+func (t *authTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	req = req.Clone(req.Context())
+	req.Header.Set("Authorization", "Bearer "+t.apiKey)
+	return t.base.RoundTrip(req)
+}
+
 // Client is the YNAB API client. Use NewClient to create one.
 type Client struct {
 	baseURL    string
-	apiKey     string
 	httpClient *http.Client
 	limiter    *rate.Limiter
 }
@@ -25,9 +35,9 @@ type Client struct {
 func NewClient(apiKey string) *Client {
 	return &Client{
 		baseURL: "https://api.ynab.com/v1",
-		apiKey:  apiKey,
 		httpClient: &http.Client{
-			Timeout: 15 * time.Second,
+			Timeout:   15 * time.Second,
+			Transport: &authTransport{apiKey: apiKey, base: http.DefaultTransport},
 		},
 	}
 }
@@ -44,7 +54,13 @@ func (c *Client) WithRateLimit(requestsPerHour, burstVolume int) *Client {
 
 // WithTimeout sets the HTTP client timeout in seconds. Defaults to 15 seconds.
 func (c *Client) WithTimeout(timeoutSeconds int) *Client {
-	c.httpClient = &http.Client{Timeout: time.Duration(timeoutSeconds) * time.Second}
+	c.httpClient.Timeout = time.Duration(timeoutSeconds) * time.Second
+	return c
+}
+
+// WithTransport replaces the HTTP transport. Primarily useful for testing.
+func (c *Client) WithTransport(t http.RoundTripper) *Client {
+	c.httpClient.Transport = t
 	return c
 }
 
@@ -63,7 +79,6 @@ func (c *Client) get(ctx context.Context, endpoint string, params url.Values, ou
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Authorization", "Bearer "+c.apiKey)
 
 	res, err := c.httpClient.Do(req)
 	if err != nil {
@@ -72,7 +87,7 @@ func (c *Client) get(ctx context.Context, endpoint string, params url.Values, ou
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		var apiErr ErrorData
+		var apiErr errorData
 		if err := json.NewDecoder(res.Body).Decode(&apiErr); err != nil {
 			return fmt.Errorf("request failed with status %d", res.StatusCode)
 		}
@@ -98,7 +113,6 @@ func (c *Client) post(ctx context.Context, endpoint string, payload any, out any
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Authorization", "Bearer "+c.apiKey)
 	req.Header.Set("Content-Type", "application/json")
 
 	res, err := c.httpClient.Do(req)
@@ -108,7 +122,7 @@ func (c *Client) post(ctx context.Context, endpoint string, payload any, out any
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusCreated && res.StatusCode != http.StatusOK {
-		var apiErr ErrorData
+		var apiErr errorData
 		if err := json.NewDecoder(res.Body).Decode(&apiErr); err != nil {
 			return fmt.Errorf("request failed with status %d", res.StatusCode)
 		}
@@ -131,7 +145,6 @@ func (c *Client) delete(ctx context.Context, endpoint string, out any) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Authorization", "Bearer "+c.apiKey)
 
 	res, err := c.httpClient.Do(req)
 	if err != nil {
@@ -140,7 +153,7 @@ func (c *Client) delete(ctx context.Context, endpoint string, out any) error {
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		var apiErr ErrorData
+		var apiErr errorData
 		if err := json.NewDecoder(res.Body).Decode(&apiErr); err != nil {
 			return fmt.Errorf("request failed with status %d", res.StatusCode)
 		}
@@ -166,7 +179,6 @@ func (c *Client) patch(ctx context.Context, endpoint string, payload any, out an
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Authorization", "Bearer "+c.apiKey)
 	req.Header.Set("Content-Type", "application/json")
 
 	res, err := c.httpClient.Do(req)
@@ -176,7 +188,7 @@ func (c *Client) patch(ctx context.Context, endpoint string, payload any, out an
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK && res.StatusCode != 209 {
-		var apiErr ErrorData
+		var apiErr errorData
 		if err := json.NewDecoder(res.Body).Decode(&apiErr); err != nil {
 			return fmt.Errorf("request failed with status %d", res.StatusCode)
 		}
@@ -202,7 +214,6 @@ func (c *Client) put(ctx context.Context, endpoint string, payload any, out any)
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Authorization", "Bearer "+c.apiKey)
 	req.Header.Set("Content-Type", "application/json")
 
 	res, err := c.httpClient.Do(req)
@@ -212,7 +223,7 @@ func (c *Client) put(ctx context.Context, endpoint string, payload any, out any)
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		var apiErr ErrorData
+		var apiErr errorData
 		if err := json.NewDecoder(res.Body).Decode(&apiErr); err != nil {
 			return fmt.Errorf("request failed with status %d", res.StatusCode)
 		}

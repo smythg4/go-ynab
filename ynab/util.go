@@ -1,5 +1,7 @@
 package ynab
 
+import "math"
+
 type DateFormat struct {
 	Format string `json:"format"`
 }
@@ -13,4 +15,12 @@ type CurrencyFormat struct {
 	GroupSeparator   string `json:"group_separator"`
 	CurrencySymbol   string `json:"currency_symbol"`
 	DisplaySymbol    bool   `json:"display_symbol"`
+}
+
+func MilliunitsToAmount(m int64) float64 {
+	return float64(m) / 1000
+}
+
+func AmountToMilliunits(a float64) int64 {
+	return int64(math.Round(a * 1000))
 }
