@@ -6,6 +6,13 @@ import (
 	"strings"
 )
 
+const (
+	testID1 = "123e4567-e89b-12d3-a456-426614174000"
+	testID2 = "223e4567-e89b-12d3-a456-426614174000"
+	testID3 = "323e4567-e89b-12d3-a456-426614174000"
+	testID4 = "423e4567-e89b-12d3-a456-426614174000"
+)
+
 type mockTransport struct {
 	body       string
 	statusCode int
