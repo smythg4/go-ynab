@@ -89,7 +89,7 @@ func TestCreateAccount(t *testing.T) {
 			t.Errorf("got ID %v, want %v", account.ID, idWant)
 		}
 
-		var payload SaveAccountWrapper
+		var payload saveAccountWrapper
 		if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
 			t.Fatalf("could not unmarshal request body: %v", err)
 		}

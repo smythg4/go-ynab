@@ -125,14 +125,14 @@ type SaveCategory struct {
 	GoalTargetDate       *Date     `json:"goal_target_date,omitempty"`
 }
 
-type SaveCategoryWrapper struct {
+type saveCategoryWrapper struct {
 	Category SaveCategory `json:"category"`
 }
 
 // CreateCategory creates a new category within a category group.
 func (c *Client) CreateCategory(ctx context.Context, planId uuid.UUID, sc SaveCategory) (*Category, error) {
 	var result categoryData
-	err := c.post(ctx, fmt.Sprintf("plans/%s/categories", planId), SaveCategoryWrapper{sc}, &result)
+	err := c.post(ctx, fmt.Sprintf("plans/%s/categories", planId), saveCategoryWrapper{sc}, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -144,14 +144,14 @@ type SaveCategoryGroup struct {
 	Name string `json:"name"`
 }
 
-type SaveCategoryGroupWrapper struct {
+type saveCategoryGroupWrapper struct {
 	CategoryGroup SaveCategoryGroup `json:"category_group"`
 }
 
 // CreateCategoryGroup creates a new category group.
 func (c *Client) CreateCategoryGroup(ctx context.Context, planId uuid.UUID, scg SaveCategoryGroup) (*CategoryGroup, error) {
 	var result categoryGroupData
-	err := c.post(ctx, fmt.Sprintf("plans/%s/category_groups", planId), SaveCategoryGroupWrapper{scg}, &result)
+	err := c.post(ctx, fmt.Sprintf("plans/%s/category_groups", planId), saveCategoryGroupWrapper{scg}, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +163,7 @@ func (c *Client) CreateCategoryGroup(ctx context.Context, planId uuid.UUID, scg 
 // UpdateCategory updates an existing category.
 func (c *Client) UpdateCategory(ctx context.Context, planId, categoryId uuid.UUID, sc SaveCategory) (*Category, error) {
 	var result categoryData
-	err := c.patch(ctx, fmt.Sprintf("plans/%s/categories/%s", planId, categoryId), SaveCategoryWrapper{sc}, &result)
+	err := c.patch(ctx, fmt.Sprintf("plans/%s/categories/%s", planId, categoryId), saveCategoryWrapper{sc}, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -175,14 +175,14 @@ type SaveMonthCategory struct {
 	Budgeted int64 `json:"budgeted"`
 }
 
-type SaveMonthCategoryWrapper struct {
+type saveMonthCategoryWrapper struct {
 	Category SaveMonthCategory `json:"category"`
 }
 
 // UpdateCategoryForMonth updates a category's budgeted amount for a specific month.
 func (c *Client) UpdateCategoryForMonth(ctx context.Context, planId uuid.UUID, month Date, categoryId uuid.UUID, smc SaveMonthCategory) (*Category, error) {
 	var result categoryData
-	err := c.patch(ctx, fmt.Sprintf("plans/%s/months/%s/categories/%s", planId, month, categoryId), SaveMonthCategoryWrapper{smc}, &result)
+	err := c.patch(ctx, fmt.Sprintf("plans/%s/months/%s/categories/%s", planId, month, categoryId), saveMonthCategoryWrapper{smc}, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -192,7 +192,7 @@ func (c *Client) UpdateCategoryForMonth(ctx context.Context, planId uuid.UUID, m
 // UpdateCategoryGroup updates an existing category group.
 func (c *Client) UpdateCategoryGroup(ctx context.Context, planId, categoryGroupId uuid.UUID, scg SaveCategoryGroup) (*CategoryGroup, error) {
 	var result categoryGroupData
-	err := c.patch(ctx, fmt.Sprintf("plans/%s/category_groups/%s", planId, categoryGroupId), SaveCategoryGroupWrapper{scg}, &result)
+	err := c.patch(ctx, fmt.Sprintf("plans/%s/category_groups/%s", planId, categoryGroupId), saveCategoryGroupWrapper{scg}, &result)
 	if err != nil {
 		return nil, err
 	}

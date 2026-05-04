@@ -103,14 +103,14 @@ type PostPayee struct {
 	Name string `json:"name"`
 }
 
-type PostPayeeWrapper struct {
+type postPayeeWrapper struct {
 	Payee PostPayee `json:"payee"`
 }
 
 // CreatePayee creates a new payee.
 func (c *Client) CreatePayee(ctx context.Context, planId uuid.UUID, pp PostPayee) (*Payee, error) {
 	var result payeeData
-	err := c.post(ctx, fmt.Sprintf("plans/%s/payees", planId), PostPayeeWrapper{pp}, &result)
+	err := c.post(ctx, fmt.Sprintf("plans/%s/payees", planId), postPayeeWrapper{pp}, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +122,7 @@ func (c *Client) CreatePayee(ctx context.Context, planId uuid.UUID, pp PostPayee
 // UpdatePayee updates an existing payee.
 func (c *Client) UpdatePayee(ctx context.Context, planId, payeeId uuid.UUID, pp PostPayee) (*Payee, error) {
 	var result payeeData
-	err := c.patch(ctx, fmt.Sprintf("plans/%s/payees/%s", planId, payeeId), PostPayeeWrapper{pp}, &result)
+	err := c.patch(ctx, fmt.Sprintf("plans/%s/payees/%s", planId, payeeId), postPayeeWrapper{pp}, &result)
 	if err != nil {
 		return nil, err
 	}

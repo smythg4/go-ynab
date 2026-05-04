@@ -135,7 +135,7 @@ func TestCreatePayee(t *testing.T) {
 			t.Errorf("got ID %v, want %v", payee.ID, idWant)
 		}
 
-		var payload PostPayeeWrapper
+		var payload postPayeeWrapper
 		if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
 			t.Fatalf("could not unmarshal request body: %v", err)
 		}
@@ -163,7 +163,7 @@ func TestUpdatePayee(t *testing.T) {
 			t.Errorf("got ID %v, want %v", payee.ID, idWant)
 		}
 
-		var payload PostPayeeWrapper
+		var payload postPayeeWrapper
 		if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
 			t.Fatalf("could not unmarshal request body: %v", err)
 		}

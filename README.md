@@ -68,9 +68,9 @@ Available error types: `ErrUnauthorized`, `ErrForbidden`, `ErrNotFound`, `ErrRat
 - [x] Get plan month
 - [x] Get category balance
 - [x] List transactions
-- [ ] Create transaction
-- [ ] Create multiple transactions
-- [ ] Update transaction
+- [x] Create transaction
+- [x] Create multiple transactions
+- [x] Update transaction
 - [ ] Update multiple transactions
 - [ ] Update category budget
 - [ ] Delete transaction

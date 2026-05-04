@@ -85,14 +85,14 @@ type SaveAccount struct {
 	Balance int64       `json:"balance"`
 }
 
-type SaveAccountWrapper struct {
+type saveAccountWrapper struct {
 	Account SaveAccount `json:"account"`
 }
 
 // CreateAccount creates a new account for a plan.
 func (c *Client) CreateAccount(ctx context.Context, planId uuid.UUID, a SaveAccount) (*Account, error) {
 	var result accountData
-	err := c.post(ctx, fmt.Sprintf("plans/%s/accounts", planId), SaveAccountWrapper{a}, &result)
+	err := c.post(ctx, fmt.Sprintf("plans/%s/accounts", planId), saveAccountWrapper{a}, &result)
 	if err != nil {
 		return nil, err
 	}

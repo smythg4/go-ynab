@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -47,6 +48,63 @@ func TestGetTransactions(t *testing.T) {
 	})
 }
 
+func TestGetTransactionsFilteredSinceDate(t *testing.T) {
+	t.Run("encodes since_date in query string", func(t *testing.T) {
+		client, transport := newTestClient(txListFixture, 200)
+
+		d := NewDate(time.Now().Date())
+		params := TransactionListParams{
+			SinceDate: &d,
+		}
+		_, _, err := client.GetTransactions(context.Background(), uuid.New(), &params)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		got := transport.lastReq.URL.RawQuery
+		if !strings.Contains(got, "since_date=") {
+			t.Errorf("expected since_date in query string, got %q", got)
+		}
+	})
+}
+
+func TestGetTransactionsFilteredServerKnowledge(t *testing.T) {
+	t.Run("encodes last_knowledge_of_server in query string", func(t *testing.T) {
+		client, transport := newTestClient(txListFixture, 200)
+
+		sk := int64(1)
+		params := TransactionListParams{
+			LastKnowledgeOfServer: &sk,
+		}
+		_, _, err := client.GetTransactions(context.Background(), uuid.New(), &params)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		got := transport.lastReq.URL.RawQuery
+		if !strings.Contains(got, "last_knowledge_of_server=") {
+			t.Errorf("expected last_knowledge_of_server in query string, got %q", got)
+		}
+	})
+}
+
+func TestGetTransactionsFilteredType(t *testing.T) {
+	t.Run("encodes type in query string", func(t *testing.T) {
+		client, transport := newTestClient(txListFixture, 200)
+
+		ttype := "unapproved"
+		params := TransactionListParams{
+			Type: &ttype,
+		}
+		_, _, err := client.GetTransactions(context.Background(), uuid.New(), &params)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		got := transport.lastReq.URL.RawQuery
+		if !strings.Contains(got, "type=") {
+			t.Errorf("expected type in query string, got %q", got)
+		}
+	})
+}
+
 func TestGetTransaction(t *testing.T) {
 	t.Run("returns single transaction on success", func(t *testing.T) {
 		client, _ := newTestClient(txSingleFixture, 200)
@@ -70,7 +128,7 @@ func TestGetTransactionsByAccount(t *testing.T) {
 	t.Run("returns transactions for account on success", func(t *testing.T) {
 		client, _ := newTestClient(txListFixture, 200)
 
-		txs, serverKnowledge, err := client.GetTransactionsByAccount(context.Background(), uuid.New(), uuid.New())
+		txs, serverKnowledge, err := client.GetTransactionsByAccount(context.Background(), uuid.New(), uuid.New(), nil)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -89,7 +147,7 @@ func TestGetTransactionsByCategory(t *testing.T) {
 	t.Run("returns transactions for category on success", func(t *testing.T) {
 		client, _ := newTestClient(txListFixture, 200)
 
-		txs, _, err := client.GetTransactionsByCategory(context.Background(), uuid.New(), uuid.New())
+		txs, _, err := client.GetTransactionsByCategory(context.Background(), uuid.New(), uuid.New(), nil)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -104,7 +162,7 @@ func TestGetTransactionsByPayee(t *testing.T) {
 	t.Run("returns transactions for payee on success", func(t *testing.T) {
 		client, _ := newTestClient(txListFixture, 200)
 
-		txs, _, err := client.GetTransactionsByPayee(context.Background(), uuid.New(), uuid.New())
+		txs, _, err := client.GetTransactionsByPayee(context.Background(), uuid.New(), uuid.New(), nil)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -120,7 +178,7 @@ func TestGetTransactionsByMonth(t *testing.T) {
 		client, _ := newTestClient(txListFixture, 200)
 
 		month := Date{time.Date(2024, 3, 1, 0, 0, 0, 0, time.UTC)}
-		txs, _, err := client.GetTransactionsByMonth(context.Background(), uuid.New(), month)
+		txs, _, err := client.GetTransactionsByMonth(context.Background(), uuid.New(), month, nil)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -243,7 +301,7 @@ func TestUpdateTransaction(t *testing.T) {
 			t.Errorf("got server_knowledge %v, want 10", resp.ServerKnowledge)
 		}
 
-		var payload UpdateTransactionWrapper
+		var payload updateTransactionWrapper
 		if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
 			t.Fatalf("could not unmarshal request body: %v", err)
 		}
@@ -277,7 +335,7 @@ func TestUpdateScheduledTransaction(t *testing.T) {
 			t.Errorf("got ID %v, want %v", tx.ID, idWant)
 		}
 
-		var payload SaveScheduledTransactionWrapper
+		var payload saveScheduledTransactionWrapper
 		if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
 			t.Fatalf("could not unmarshal request body: %v", err)
 		}
@@ -314,7 +372,7 @@ func TestCreateTransaction(t *testing.T) {
 			t.Errorf("got server_knowledge %v, want 6", resp.ServerKnowledge)
 		}
 
-		var payload SaveTransactionWrapper
+		var payload saveTransactionWrapper
 		if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
 			t.Fatalf("could not unmarshal request body: %v", err)
 		}
@@ -349,7 +407,7 @@ func TestCreateTransactions(t *testing.T) {
 			t.Errorf("got server_knowledge %v, want 7", resp.ServerKnowledge)
 		}
 
-		var payload SaveTransactionsWrapper
+		var payload saveTransactionsWrapper
 		if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
 			t.Fatalf("could not unmarshal request body: %v", err)
 		}
@@ -406,7 +464,7 @@ func TestCreateScheduledTransaction(t *testing.T) {
 			t.Errorf("got ID %v, want %v", tx.ID, idWant)
 		}
 
-		var payload SaveScheduledTransactionWrapper
+		var payload saveScheduledTransactionWrapper
 		if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
 			t.Fatalf("could not unmarshal request body: %v", err)
 		}
@@ -440,7 +498,7 @@ func TestUpdateTransactions(t *testing.T) {
 			t.Errorf("got server_knowledge %v, want 9", resp.ServerKnowledge)
 		}
 
-		var payload UpdateTransactionsWrapper
+		var payload updateTransactionsWrapper
 		if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
 			t.Fatalf("could not unmarshal request body: %v", err)
 		}

@@ -28,6 +28,7 @@ type Client struct {
 	baseURL    string
 	httpClient *http.Client
 	limiter    *rate.Limiter
+	apiKey     string
 }
 
 // NewClient returns a new Client with the given Personal Access Token.
@@ -59,8 +60,9 @@ func (c *Client) WithTimeout(timeoutSeconds int) *Client {
 }
 
 // WithTransport replaces the HTTP transport. Primarily useful for testing.
+// Auth is preserved across transport replacements.
 func (c *Client) WithTransport(t http.RoundTripper) *Client {
-	c.httpClient.Transport = t
+	c.httpClient.Transport = &authTransport{apiKey: c.apiKey, base: t}
 	return c
 }
 
@@ -187,6 +189,7 @@ func (c *Client) patch(ctx context.Context, endpoint string, payload any, out an
 	}
 	defer res.Body.Close()
 
+	// YNAB uses the unsupported http status code 209 for some PATCH responses
 	if res.StatusCode != http.StatusOK && res.StatusCode != 209 {
 		var apiErr errorData
 		if err := json.NewDecoder(res.Body).Decode(&apiErr); err != nil {

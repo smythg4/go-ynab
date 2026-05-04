@@ -108,7 +108,7 @@ func TestCreateCategory(t *testing.T) {
 			t.Errorf("got ID %v, want %v", category.ID, idWant)
 		}
 
-		var payload SaveCategoryWrapper
+		var payload saveCategoryWrapper
 		if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
 			t.Fatalf("could not unmarshal request body: %v", err)
 		}
@@ -139,7 +139,7 @@ func TestCreateCategoryGroup(t *testing.T) {
 			t.Errorf("got ID %v, want %v", group.ID, idWant)
 		}
 
-		var payload SaveCategoryGroupWrapper
+		var payload saveCategoryGroupWrapper
 		if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
 			t.Fatalf("could not unmarshal request body: %v", err)
 		}
@@ -170,7 +170,7 @@ func TestUpdateCategory(t *testing.T) {
 			t.Errorf("got Balance %v, want 20000", category.Balance)
 		}
 
-		var payload SaveCategoryWrapper
+		var payload saveCategoryWrapper
 		if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
 			t.Fatalf("could not unmarshal request body: %v", err)
 		}
@@ -201,7 +201,7 @@ func TestUpdateCategoryForMonth(t *testing.T) {
 			t.Errorf("got ID %v, want %v", category.ID, idWant)
 		}
 
-		var payload SaveMonthCategoryWrapper
+		var payload saveMonthCategoryWrapper
 		if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
 			t.Fatalf("could not unmarshal request body: %v", err)
 		}
@@ -232,7 +232,7 @@ func TestUpdateCategoryGroup(t *testing.T) {
 			t.Errorf("got ID %v, want %v", group.ID, idWant)
 		}
 
-		var payload SaveCategoryGroupWrapper
+		var payload saveCategoryGroupWrapper
 		if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
 			t.Fatalf("could not unmarshal request body: %v", err)
 		}
