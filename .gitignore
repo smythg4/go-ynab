@@ -1,0 +1,16 @@
+# binaries
+/create-transaction
+/create-transactions
+/delete-transaction
+/delta-request
+/get-category-balance
+/get-plan-month
+/list-plans
+/list-transactions
+/split-transactions
+/update-category-budget
+/update-transaction
+/update-transactions
+
+# test cache
+/vendor/

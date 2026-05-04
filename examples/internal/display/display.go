@@ -3,7 +3,7 @@ package display
 import (
 	"fmt"
 
-	"go-ynab/ynab"
+	"github.com/smythg4/go-ynab/ynab"
 )
 
 func truncate(s string, max int) string {

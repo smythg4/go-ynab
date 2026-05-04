@@ -13,7 +13,7 @@ import (
 	"log"
 	"os"
 
-	"go-ynab/ynab"
+	"github.com/smythg4/go-ynab/ynab"
 )
 
 func main() {

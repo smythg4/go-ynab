@@ -26,9 +26,10 @@ package main
 import (
     "context"
     "fmt"
+    "log"
     "os"
 
-    "github.com/smythg4/go-ynab"
+    "github.com/smythg4/go-ynab/ynab"
 )
 
 func main() {
@@ -92,18 +93,18 @@ Available error types: `ErrUnauthorized`, `ErrForbidden`, `ErrNotFound`, `ErrRat
 
 ## Examples
 
-- [x] List plans
-- [x] Get plan month
-- [x] Get category balance
-- [x] List transactions
-- [x] Create transaction
-- [x] Create multiple transactions
-- [x] Update transaction
-- [x] Update multiple transactions
-- [x] Update category budget
-- [x] Delete transaction
-- [x] Split transaction
-- [x] Delta request
+- [List plans](examples/list-plans/main.go)
+- [Get plan month](examples/get-plan-month/main.go)
+- [Get category balance](examples/get-category-balance/main.go)
+- [List transactions](examples/list-transactions/main.go)
+- [Create transaction](examples/create-transaction/main.go)
+- [Create multiple transactions](examples/create-transactions/main.go)
+- [Update transaction](examples/update-transaction/main.go)
+- [Update multiple transactions](examples/update-transactions/main.go)
+- [Update category budget](examples/update-category-budget/main.go)
+- [Delete transaction](examples/delete-transaction/main.go)
+- [Split transaction](examples/split-transactions/main.go)
+- [Delta request](examples/delta-request/main.go)
 
 ## API Coverage
 
@@ -192,9 +193,14 @@ Available error types: `ErrUnauthorized`, `ErrForbidden`, `ErrNotFound`, `ErrRat
 
 Unit tests cover all endpoints (GET, POST, PATCH, PUT, DELETE), client configuration, error type dispatch, and auth header injection. Write operation tests verify the HTTP method and request body serialization.
 
-Run the suite with:
 ```
 go test ./ynab/...
+```
+
+Integration tests exercise the live API against a real plan and require `YNAB_TOKEN` and `YNAB_TEST_PLAN_ID` environment variables. They are opt-in via a build tag:
+
+```
+YNAB_TOKEN=... YNAB_TEST_PLAN_ID=... go test -tags integration -v ./integration/
 ```
 
 ## License

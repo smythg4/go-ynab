@@ -11,7 +11,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"go-ynab/ynab"
+	"github.com/smythg4/go-ynab/ynab"
 )
 
 func requireEnv(t *testing.T, key string) string {

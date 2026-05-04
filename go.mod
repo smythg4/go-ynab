@@ -1,6 +1,4 @@
-// TODO: Once this is uploaded, swap these module declarations out
-//module github.com/smythg4/go-ynab
-module go-ynab
+module github.com/smythg4/go-ynab
 
 go 1.26.2
 
