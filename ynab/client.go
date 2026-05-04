@@ -32,19 +32,24 @@ type Client struct {
 }
 
 // NewClient returns a new Client with the given Personal Access Token.
-// The client has a 15-second request timeout by default.
+// The client has a 10-second request timeout by default.
 func NewClient(apiKey string) *Client {
 	return &Client{
 		baseURL: "https://api.ynab.com/v1",
 		httpClient: &http.Client{
-			Timeout:   15 * time.Second,
+			Timeout:   10 * time.Second,
 			Transport: &authTransport{apiKey: apiKey, base: http.DefaultTransport},
 		},
 	}
 }
 
 // WithRateLimit configures a token bucket rate limiter on the client.
-// The YNAB API allows 200 requests per hour. Example:
+// The YNAB API enforces a rolling window of 200 requests per hour.
+//
+// Keep burstVolume small. A high burst (e.g. 200) lets the client exhaust
+// the rolling window instantly, after which YNAB will reject requests for up
+// to an hour while the token bucket continues issuing them. A small burst
+// (e.g. 10) keeps consumption spread out and avoids this divergence. Example:
 //
 //	client := ynab.NewClient(apiKey).WithRateLimit(200, 10)
 func (c *Client) WithRateLimit(requestsPerHour, burstVolume int) *Client {
@@ -53,7 +58,7 @@ func (c *Client) WithRateLimit(requestsPerHour, burstVolume int) *Client {
 	return c
 }
 
-// WithTimeout sets the HTTP client timeout in seconds. Defaults to 15 seconds.
+// WithTimeout sets the HTTP client timeout in seconds. Defaults to 10 seconds.
 func (c *Client) WithTimeout(timeoutSeconds int) *Client {
 	c.httpClient.Timeout = time.Duration(timeoutSeconds) * time.Second
 	return c

@@ -29,8 +29,8 @@ func TestNewClient(t *testing.T) {
 			t.Errorf("got baseURL %v, want https://api.ynab.com/v1", c.baseURL)
 		}
 
-		if c.httpClient.Timeout != 15*time.Second {
-			t.Errorf("got timeout %v, want 15s", c.httpClient.Timeout)
+		if c.httpClient.Timeout != 10*time.Second {
+			t.Errorf("got timeout %v, want 10s", c.httpClient.Timeout)
 		}
 	})
 }

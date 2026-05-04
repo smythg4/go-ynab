@@ -45,6 +45,34 @@ func main() {
 }
 ```
 
+## Rate Limiting
+
+The [YNAB API](https://api.ynab.com/#rate-limiting) allows 200 requests per hour. `WithRateLimit` enables a token bucket limiter that automatically spaces requests to stay within that limit:
+
+```go
+client := ynab.NewClient(os.Getenv("YNAB_TOKEN")).WithRateLimit(200, 10)
+```
+
+The first argument is the request budget per hour; the second is the burst size — the number of requests that can be made immediately before throttling begins. Calls block until a token is available rather than returning an error, so no retry logic is needed on the caller's side.
+
+Rate limiting is opt-in. Omit `WithRateLimit` for scripts or one-off tools where request volume is not a concern.
+
+## Timeout
+
+The default request timeout is 10 seconds. Use `WithTimeout` to override it:
+
+```go
+client := ynab.NewClient(os.Getenv("YNAB_TOKEN")).WithTimeout(30)
+```
+
+Both methods return the client, so they can be chained:
+
+```go
+client := ynab.NewClient(os.Getenv("YNAB_TOKEN")).
+    WithRateLimit(200, 10).
+    WithTimeout(30)
+```
+
 ## Error Handling
 
 Errors from the API are returned as typed errors that can be inspected with `errors.As`:
@@ -71,8 +99,8 @@ Available error types: `ErrUnauthorized`, `ErrForbidden`, `ErrNotFound`, `ErrRat
 - [x] Create transaction
 - [x] Create multiple transactions
 - [x] Update transaction
-- [ ] Update multiple transactions
-- [ ] Update category budget
+- [x] Update multiple transactions
+- [x] Update category budget
 - [ ] Delete transaction
 - [ ] Split transaction
 - [ ] Delta request
