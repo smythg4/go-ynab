@@ -6,15 +6,17 @@ import (
 	"go-ynab/ynab"
 	"sort"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // TODO: Gut and rework this
 
 type MonthCategory struct {
-	Month         string
+	Month         ynab.Date
 	Cat           ynab.Category
-	PlanId        string
-	PlanLastMonth string
+	PlanId        uuid.UUID
+	PlanLastMonth ynab.Date
 }
 
 func (mc *MonthCategory) String() string {
@@ -67,17 +69,17 @@ func (s *Service) FetchCategories() error {
 			if month.Month.Before(time.Now()) && month.Month.After(time.Now().AddDate(0, -s.TimeFrame, 0)) {
 				for _, cat := range month.Categories {
 					s.Categories = append(s.Categories, MonthCategory{
-						Month:         month.Month.Format("2006-01-02"),
+						Month:         month.Month,
 						Cat:           cat,
-						PlanId:        plan.ID.String(),
-						PlanLastMonth: plan.LastMonth.Time.Format("2006-01-02"),
+						PlanId:        plan.ID,
+						PlanLastMonth: plan.LastMonth,
 					})
 				}
 			}
 		}
 	}
 	sort.Slice(s.Categories, func(i, j int) bool {
-		return s.Categories[i].PlanLastMonth > s.Categories[j].PlanLastMonth
+		return s.Categories[i].PlanLastMonth.String() > s.Categories[j].PlanLastMonth.String()
 	})
 	return nil
 }

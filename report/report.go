@@ -156,10 +156,10 @@ func NewReport(mc []service.MonthCategory, months int) Report {
 		if claimedBy[rc] == nil {
 			claimedBy[rc] = make(map[string]string)
 		}
-		if owner := claimedBy[rc][item.Month]; owner != "" && owner != item.PlanId {
+		if owner := claimedBy[rc][item.Month.String()]; owner != "" && owner != item.PlanId.String() {
 			continue
 		}
-		claimedBy[rc][item.Month] = item.PlanId
+		claimedBy[rc][item.Month.String()] = item.PlanId.String()
 		cats[rc] = append(cats[rc], item)
 	}
 	return Report{Categories: cats, Months: months}

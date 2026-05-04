@@ -64,10 +64,10 @@ Available error types: `ErrUnauthorized`, `ErrForbidden`, `ErrNotFound`, `ErrRat
 
 ## Examples
 
-- [ ] List plans
-- [ ] Get plan month
-- [ ] Get category balance
-- [ ] List transactions
+- [x] List plans
+- [x] Get plan month
+- [x] Get category balance
+- [x] List transactions
 - [ ] Create transaction
 - [ ] Create multiple transactions
 - [ ] Update transaction
@@ -168,5 +168,11 @@ Run the suite with:
 ```
 go test ./ynab/...
 ```
+
+## License
+
+[MIT](LICENSE)
+
+---
 
 Not affiliated with YNAB. [YNAB API Terms of Service](https://api.ynab.com/#terms).
