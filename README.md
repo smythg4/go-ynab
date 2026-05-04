@@ -162,7 +162,7 @@ Available error types: `ErrUnauthorized`, `ErrForbidden`, `ErrNotFound`, `ErrRat
 
 ## Test Coverage
 
-Unit tests cover all GET endpoints, client configuration, error type dispatch, and auth header injection. Write operations (POST, PATCH, PUT, DELETE) are pending a testutil redesign to capture HTTP method and request body.
+Unit tests cover all endpoints (GET, POST, PATCH, PUT, DELETE), client configuration, error type dispatch, and auth header injection. Write operation tests verify the HTTP method and request body serialization.
 
 Run the suite with:
 ```

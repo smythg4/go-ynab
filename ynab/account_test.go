@@ -2,6 +2,8 @@ package ynab
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
 	"testing"
 
 	"github.com/google/uuid"
@@ -14,7 +16,7 @@ const accountSingleFixture = `{"data":{"account":` + accountFixture + `}}`
 
 func TestGetAccounts(t *testing.T) {
 	t.Run("returns account list on success", func(t *testing.T) {
-		client := newTestClient(accountListFixture, 200)
+		client, _ := newTestClient(accountListFixture, 200)
 
 		accounts, serverKnowledge, err := client.GetAccounts(context.Background(), uuid.New(), nil)
 		if err != nil {
@@ -46,7 +48,7 @@ func TestGetAccounts(t *testing.T) {
 
 func TestGetAccount(t *testing.T) {
 	t.Run("returns single account on success", func(t *testing.T) {
-		client := newTestClient(accountSingleFixture, 200)
+		client, _ := newTestClient(accountSingleFixture, 200)
 
 		account, err := client.GetAccount(context.Background(), uuid.New(), uuid.New())
 		if err != nil {
@@ -61,6 +63,38 @@ func TestGetAccount(t *testing.T) {
 		nameWant := "Checking"
 		if account.Name != nameWant {
 			t.Errorf("got Name %v, want %v", account.Name, nameWant)
+		}
+	})
+}
+
+func TestCreateAccount(t *testing.T) {
+	t.Run("sends POST and returns account on success", func(t *testing.T) {
+		client, transport := newTestClient(accountSingleFixture, 201)
+
+		account, err := client.CreateAccount(context.Background(), uuid.New(), SaveAccount{
+			Name:    "Checking",
+			Type:    AccountTypeChecking,
+			Balance: 100000,
+		})
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if transport.lastReq.Method != http.MethodPost {
+			t.Errorf("got method %v, want POST", transport.lastReq.Method)
+		}
+
+		idWant := uuid.MustParse("123e4567-e89b-12d3-a456-426614174000")
+		if account.ID != idWant {
+			t.Errorf("got ID %v, want %v", account.ID, idWant)
+		}
+
+		var payload SaveAccountWrapper
+		if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
+			t.Fatalf("could not unmarshal request body: %v", err)
+		}
+		if payload.Account.Type != AccountTypeChecking {
+			t.Errorf("got payload type %v, want %v", payload.Account.Type, AccountTypeChecking)
 		}
 	})
 }

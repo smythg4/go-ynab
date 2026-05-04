@@ -2,6 +2,8 @@ package ynab
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
 	"testing"
 	"time"
 
@@ -20,7 +22,7 @@ const scheduledTxSingleFixture = `{"data":{"scheduled_transaction":` + scheduled
 
 func TestGetTransactions(t *testing.T) {
 	t.Run("returns transaction list on success", func(t *testing.T) {
-		client := newTestClient(txListFixture, 200)
+		client, _ := newTestClient(txListFixture, 200)
 
 		txs, serverKnowledge, err := client.GetTransactions(context.Background(), uuid.New(), nil)
 		if err != nil {
@@ -47,7 +49,7 @@ func TestGetTransactions(t *testing.T) {
 
 func TestGetTransaction(t *testing.T) {
 	t.Run("returns single transaction on success", func(t *testing.T) {
-		client := newTestClient(txSingleFixture, 200)
+		client, _ := newTestClient(txSingleFixture, 200)
 
 		tx, err := client.GetTransaction(context.Background(), uuid.New(), "abc-123")
 		if err != nil {
@@ -66,7 +68,7 @@ func TestGetTransaction(t *testing.T) {
 
 func TestGetTransactionsByAccount(t *testing.T) {
 	t.Run("returns transactions for account on success", func(t *testing.T) {
-		client := newTestClient(txListFixture, 200)
+		client, _ := newTestClient(txListFixture, 200)
 
 		txs, serverKnowledge, err := client.GetTransactionsByAccount(context.Background(), uuid.New(), uuid.New())
 		if err != nil {
@@ -85,7 +87,7 @@ func TestGetTransactionsByAccount(t *testing.T) {
 
 func TestGetTransactionsByCategory(t *testing.T) {
 	t.Run("returns transactions for category on success", func(t *testing.T) {
-		client := newTestClient(txListFixture, 200)
+		client, _ := newTestClient(txListFixture, 200)
 
 		txs, _, err := client.GetTransactionsByCategory(context.Background(), uuid.New(), uuid.New())
 		if err != nil {
@@ -100,7 +102,7 @@ func TestGetTransactionsByCategory(t *testing.T) {
 
 func TestGetTransactionsByPayee(t *testing.T) {
 	t.Run("returns transactions for payee on success", func(t *testing.T) {
-		client := newTestClient(txListFixture, 200)
+		client, _ := newTestClient(txListFixture, 200)
 
 		txs, _, err := client.GetTransactionsByPayee(context.Background(), uuid.New(), uuid.New())
 		if err != nil {
@@ -115,7 +117,7 @@ func TestGetTransactionsByPayee(t *testing.T) {
 
 func TestGetTransactionsByMonth(t *testing.T) {
 	t.Run("returns transactions for month on success", func(t *testing.T) {
-		client := newTestClient(txListFixture, 200)
+		client, _ := newTestClient(txListFixture, 200)
 
 		month := Date{time.Date(2024, 3, 1, 0, 0, 0, 0, time.UTC)}
 		txs, _, err := client.GetTransactionsByMonth(context.Background(), uuid.New(), month)
@@ -131,7 +133,7 @@ func TestGetTransactionsByMonth(t *testing.T) {
 
 func TestGetScheduledTransactions(t *testing.T) {
 	t.Run("returns scheduled transaction list on success", func(t *testing.T) {
-		client := newTestClient(scheduledTxListFixture, 200)
+		client, _ := newTestClient(scheduledTxListFixture, 200)
 
 		txs, serverKnowledge, err := client.GetScheduledTransactions(context.Background(), uuid.New())
 		if err != nil {
@@ -159,7 +161,7 @@ func TestGetScheduledTransactions(t *testing.T) {
 
 func TestGetScheduledTransaction(t *testing.T) {
 	t.Run("returns single scheduled transaction on success", func(t *testing.T) {
-		client := newTestClient(scheduledTxSingleFixture, 200)
+		client, _ := newTestClient(scheduledTxSingleFixture, 200)
 
 		tx, err := client.GetScheduledTransaction(context.Background(), uuid.New(), uuid.New())
 		if err != nil {
@@ -169,6 +171,281 @@ func TestGetScheduledTransaction(t *testing.T) {
 		idWant := uuid.MustParse("123e4567-e89b-12d3-a456-426614174000")
 		if tx.ID != idWant {
 			t.Errorf("got ID %v, want %v", tx.ID, idWant)
+		}
+	})
+}
+
+func TestDeleteTransaction(t *testing.T) {
+	t.Run("returns deleted transaction on success", func(t *testing.T) {
+		client, transport := newTestClient(txSingleFixture, 200)
+
+		tx, err := client.DeleteTransaction(context.Background(), uuid.New(), "abc-123")
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if transport.lastReq.Method != http.MethodDelete {
+			t.Errorf("got method %v, want DELETE", transport.lastReq.Method)
+		}
+
+		if tx.ID != "abc-123" {
+			t.Errorf("got ID %v, want abc-123", tx.ID)
+		}
+	})
+}
+
+func TestDeleteScheduledTransaction(t *testing.T) {
+	t.Run("returns deleted scheduled transaction on success", func(t *testing.T) {
+		client, transport := newTestClient(scheduledTxSingleFixture, 200)
+
+		tx, err := client.DeleteScheduledTransaction(context.Background(), uuid.New(), uuid.New())
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if transport.lastReq.Method != http.MethodDelete {
+			t.Errorf("got method %v, want DELETE", transport.lastReq.Method)
+		}
+
+		idWant := uuid.MustParse("123e4567-e89b-12d3-a456-426614174000")
+		if tx.ID != idWant {
+			t.Errorf("got ID %v, want %v", tx.ID, idWant)
+		}
+	})
+}
+
+func TestUpdateTransaction(t *testing.T) {
+	t.Run("sends PUT and returns response on success", func(t *testing.T) {
+		fixture := `{"data":{"transaction_ids":["abc-123"],"transaction":` + txFixture +
+			`,"duplicate_import_ids":[],"server_knowledge":10}}`
+		client, transport := newTestClient(fixture, 200)
+
+		resp, err := client.UpdateTransaction(context.Background(), uuid.New(), "abc-123", UpdateTransaction{
+			ID:        "abc-123",
+			AccountID: uuid.New(),
+			Date:      Date{time.Now()},
+			Amount:    -15000,
+			Cleared:   ClearedStatusCleared,
+		})
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if transport.lastReq.Method != http.MethodPut {
+			t.Errorf("got method %v, want PUT", transport.lastReq.Method)
+		}
+
+		if resp.Transaction.ID != "abc-123" {
+			t.Errorf("got transaction ID %v, want abc-123", resp.Transaction.ID)
+		}
+
+		if resp.ServerKnowledge != 10 {
+			t.Errorf("got server_knowledge %v, want 10", resp.ServerKnowledge)
+		}
+
+		var payload UpdateTransactionWrapper
+		if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
+			t.Fatalf("could not unmarshal request body: %v", err)
+		}
+		if payload.Transactions.ID != "abc-123" {
+			t.Errorf("got payload ID %v, want abc-123", payload.Transactions.ID)
+		}
+	})
+}
+
+func TestUpdateScheduledTransaction(t *testing.T) {
+	t.Run("sends PUT and returns scheduled transaction on success", func(t *testing.T) {
+		client, transport := newTestClient(scheduledTxSingleFixture, 200)
+
+		tx, err := client.UpdateScheduledTransaction(context.Background(), uuid.New(), uuid.New(),
+			SaveScheduledTransaction{
+				AccountID: uuid.New(),
+				Date:      Date{time.Now()},
+				Amount:    -50000,
+				Frequency: FrequencyMonthly,
+			})
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if transport.lastReq.Method != http.MethodPut {
+			t.Errorf("got method %v, want PUT", transport.lastReq.Method)
+		}
+
+		idWant := uuid.MustParse("123e4567-e89b-12d3-a456-426614174000")
+		if tx.ID != idWant {
+			t.Errorf("got ID %v, want %v", tx.ID, idWant)
+		}
+
+		var payload SaveScheduledTransactionWrapper
+		if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
+			t.Fatalf("could not unmarshal request body: %v", err)
+		}
+		if payload.Transaction.Frequency != FrequencyMonthly {
+			t.Errorf("got payload frequency %v, want %v", payload.Transaction.Frequency, FrequencyMonthly)
+		}
+	})
+}
+
+func TestCreateTransaction(t *testing.T) {
+	t.Run("sends POST and returns response on success", func(t *testing.T) {
+		fixture := `{"data":{"transaction_ids":["abc-123"],"transaction":` + txFixture + `,"duplicate_import_ids":[],"server_knowledge":6}}`
+		client, transport := newTestClient(fixture, 201)
+
+		resp, err := client.CreateTransaction(context.Background(), uuid.New(), SaveTransaction{
+			AccountID: uuid.New(),
+			Date:      Date{time.Now()},
+			Amount:    -15000,
+			Cleared:   ClearedStatusCleared,
+		})
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if transport.lastReq.Method != http.MethodPost {
+			t.Errorf("got method %v, want POST", transport.lastReq.Method)
+		}
+
+		if resp.Transaction.ID != "abc-123" {
+			t.Errorf("got transaction ID %v, want abc-123", resp.Transaction.ID)
+		}
+
+		if resp.ServerKnowledge != 6 {
+			t.Errorf("got server_knowledge %v, want 6", resp.ServerKnowledge)
+		}
+
+		var payload SaveTransactionWrapper
+		if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
+			t.Fatalf("could not unmarshal request body: %v", err)
+		}
+		if payload.Transaction.Amount != -15000 {
+			t.Errorf("got payload amount %v, want -15000", payload.Transaction.Amount)
+		}
+	})
+}
+
+func TestCreateTransactions(t *testing.T) {
+	t.Run("sends POST and returns response on success", func(t *testing.T) {
+		fixture := `{"data":{"transaction_ids":["abc-123","abc-456"],"transactions":[` + txFixture + `,` + txFixture + `],"duplicate_import_ids":[],"server_knowledge":7}}`
+		client, transport := newTestClient(fixture, 201)
+
+		resp, err := client.CreateTransactions(context.Background(), uuid.New(), []SaveTransaction{
+			{AccountID: uuid.New(), Date: Date{time.Now()}, Amount: -15000, Cleared: ClearedStatusCleared},
+			{AccountID: uuid.New(), Date: Date{time.Now()}, Amount: -25000, Cleared: ClearedStatusUncleared},
+		})
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if transport.lastReq.Method != http.MethodPost {
+			t.Errorf("got method %v, want POST", transport.lastReq.Method)
+		}
+
+		if len(resp.TransactionIDs) != 2 {
+			t.Fatalf("expected 2 transaction IDs, got %d", len(resp.TransactionIDs))
+		}
+
+		if resp.ServerKnowledge != 7 {
+			t.Errorf("got server_knowledge %v, want 7", resp.ServerKnowledge)
+		}
+
+		var payload SaveTransactionsWrapper
+		if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
+			t.Fatalf("could not unmarshal request body: %v", err)
+		}
+		if len(payload.Transactions) != 2 {
+			t.Errorf("got %d transactions in payload, want 2", len(payload.Transactions))
+		}
+	})
+}
+
+func TestImportTransactions(t *testing.T) {
+	t.Run("sends POST and returns import response on success", func(t *testing.T) {
+		fixture := `{"data":{"transaction_ids":["abc-123"],"server_knowledge":8}}`
+		client, transport := newTestClient(fixture, 200)
+
+		resp, err := client.ImportTransactions(context.Background(), uuid.New())
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if transport.lastReq.Method != http.MethodPost {
+			t.Errorf("got method %v, want POST", transport.lastReq.Method)
+		}
+
+		if len(resp.TransactionIDs) != 1 {
+			t.Fatalf("expected 1 transaction ID, got %d", len(resp.TransactionIDs))
+		}
+
+		if resp.ServerKnowledge != 8 {
+			t.Errorf("got server_knowledge %v, want 8", resp.ServerKnowledge)
+		}
+	})
+}
+
+func TestCreateScheduledTransaction(t *testing.T) {
+	t.Run("sends POST and returns scheduled transaction on success", func(t *testing.T) {
+		client, transport := newTestClient(scheduledTxSingleFixture, 201)
+
+		tx, err := client.CreateScheduledTransaction(context.Background(), uuid.New(), SaveScheduledTransaction{
+			AccountID: uuid.New(),
+			Date:      Date{time.Now()},
+			Amount:    -50000,
+			Frequency: FrequencyMonthly,
+		})
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if transport.lastReq.Method != http.MethodPost {
+			t.Errorf("got method %v, want POST", transport.lastReq.Method)
+		}
+
+		idWant := uuid.MustParse("123e4567-e89b-12d3-a456-426614174000")
+		if tx.ID != idWant {
+			t.Errorf("got ID %v, want %v", tx.ID, idWant)
+		}
+
+		var payload SaveScheduledTransactionWrapper
+		if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
+			t.Fatalf("could not unmarshal request body: %v", err)
+		}
+		if payload.Transaction.Frequency != FrequencyMonthly {
+			t.Errorf("got payload frequency %v, want %v", payload.Transaction.Frequency, FrequencyMonthly)
+		}
+	})
+}
+
+func TestUpdateTransactions(t *testing.T) {
+	t.Run("sends PATCH and returns response on success", func(t *testing.T) {
+		fixture := `{"data":{"transaction_ids":["abc-123"],"transactions":[` + txFixture + `],"duplicate_import_ids":[],"server_knowledge":9}}`
+		client, transport := newTestClient(fixture, 200)
+
+		resp, err := client.UpdateTransactions(context.Background(), uuid.New(), []UpdateTransaction{
+			{ID: "abc-123", AccountID: uuid.New(), Date: Date{time.Now()}, Amount: -15000, Cleared: ClearedStatusCleared},
+		})
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if transport.lastReq.Method != http.MethodPatch {
+			t.Errorf("got method %v, want PATCH", transport.lastReq.Method)
+		}
+
+		if len(resp.Transactions) != 1 {
+			t.Fatalf("expected 1 transaction, got %d", len(resp.Transactions))
+		}
+
+		if resp.ServerKnowledge != 9 {
+			t.Errorf("got server_knowledge %v, want 9", resp.ServerKnowledge)
+		}
+
+		var payload UpdateTransactionsWrapper
+		if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
+			t.Fatalf("could not unmarshal request body: %v", err)
+		}
+		if len(payload.Transactions) != 1 {
+			t.Errorf("got %d transactions in payload, want 1", len(payload.Transactions))
 		}
 	})
 }

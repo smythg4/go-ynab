@@ -15,7 +15,7 @@ const monthSingleFixture = `{"data":{"month":` + monthFixture + `}}`
 
 func TestGetMonths(t *testing.T) {
 	t.Run("returns month list on success", func(t *testing.T) {
-		client := newTestClient(monthListFixture, 200)
+		client, _ := newTestClient(monthListFixture, 200)
 
 		months, serverKnowledge, err := client.GetMonths(context.Background(), uuid.New())
 		if err != nil {
@@ -42,7 +42,7 @@ func TestGetMonths(t *testing.T) {
 
 func TestGetMonth(t *testing.T) {
 	t.Run("returns single month on success", func(t *testing.T) {
-		client := newTestClient(monthSingleFixture, 200)
+		client, _ := newTestClient(monthSingleFixture, 200)
 
 		month := Date{time.Date(2024, 3, 1, 0, 0, 0, 0, time.UTC)}
 		result, err := client.GetMonth(context.Background(), uuid.New(), month)

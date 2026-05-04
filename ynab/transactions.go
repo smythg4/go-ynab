@@ -389,10 +389,10 @@ type UpdateTransaction struct {
 }
 
 type UpdateTransactionsWrapper struct {
-	Transactions []UpdateTransaction `json:"transaction"`
+	Transactions []UpdateTransaction `json:"transactions"`
 }
 type UpdateTransactionWrapper struct {
-	Transactions UpdateTransaction `json:"transactions"`
+	Transactions UpdateTransaction `json:"transaction"`
 }
 
 // UpdateTransactions applies partial updates to multiple transactions (PATCH).

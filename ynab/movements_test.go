@@ -18,7 +18,7 @@ const movementGroupListFixture = `{"data":{"money_movement_groups":[` + movement
 
 func TestGetMoneyMovements(t *testing.T) {
 	t.Run("returns money movement list on success", func(t *testing.T) {
-		client := newTestClient(movementListFixture, 200)
+		client, _ := newTestClient(movementListFixture, 200)
 
 		movements, err := client.GetMoneyMovements(context.Background(), uuid.New())
 		if err != nil {
@@ -42,7 +42,7 @@ func TestGetMoneyMovements(t *testing.T) {
 
 func TestGetMoneyMovementsByMonth(t *testing.T) {
 	t.Run("returns money movements for month on success", func(t *testing.T) {
-		client := newTestClient(movementListFixture, 200)
+		client, _ := newTestClient(movementListFixture, 200)
 
 		month := Date{time.Date(2024, 3, 1, 0, 0, 0, 0, time.UTC)}
 		movements, serverKnowledge, err := client.GetMoneyMovementsByMonth(context.Background(), uuid.New(), month)
@@ -62,7 +62,7 @@ func TestGetMoneyMovementsByMonth(t *testing.T) {
 
 func TestGetMoneyMovementGroups(t *testing.T) {
 	t.Run("returns money movement group list on success", func(t *testing.T) {
-		client := newTestClient(movementGroupListFixture, 200)
+		client, _ := newTestClient(movementGroupListFixture, 200)
 
 		groups, serverKnowledge, err := client.GetMoneyMovementGroups(context.Background(), uuid.New())
 		if err != nil {
@@ -86,7 +86,7 @@ func TestGetMoneyMovementGroups(t *testing.T) {
 
 func TestGetMoneyMovementGroupsByMonth(t *testing.T) {
 	t.Run("returns money movement groups for month on success", func(t *testing.T) {
-		client := newTestClient(movementGroupListFixture, 200)
+		client, _ := newTestClient(movementGroupListFixture, 200)
 
 		month := Date{time.Date(2024, 3, 1, 0, 0, 0, 0, time.UTC)}
 		groups, serverKnowledge, err := client.GetMoneyMovementGroupsByMonth(context.Background(), uuid.New(), month)
