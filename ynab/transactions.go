@@ -241,17 +241,18 @@ func (c *Client) GetScheduledTransaction(ctx context.Context, planId, txId uuid.
 
 // SaveTransaction is the request body for creating a transaction. Amount is in milliunits.
 type SaveTransaction struct {
-	AccountID  uuid.UUID     `json:"account_id"`
-	Date       Date          `json:"date"`
-	Amount     int64         `json:"amount"`
-	PayeeID    *uuid.UUID    `json:"payee_id,omitempty"`
-	PayeeName  *string       `json:"payee_name,omitempty"`
-	CategoryID *uuid.UUID    `json:"category_id,omitempty"`
-	Memo       *string       `json:"memo,omitempty"`
-	Cleared    ClearedStatus `json:"cleared,omitempty"`
-	Approved   *bool         `json:"approved,omitempty"`
-	FlagColor  *FlagColor    `json:"flag_color,omitempty"`
-	ImportID   *string       `json:"import_id,omitempty"`
+	AccountID       uuid.UUID            `json:"account_id"`
+	Date            Date                 `json:"date"`
+	Amount          int64                `json:"amount"`
+	PayeeID         *uuid.UUID           `json:"payee_id,omitempty"`
+	PayeeName       *string              `json:"payee_name,omitempty"`
+	CategoryID      *uuid.UUID           `json:"category_id,omitempty"`
+	Memo            *string              `json:"memo,omitempty"`
+	Cleared         ClearedStatus        `json:"cleared,omitempty"`
+	Approved        *bool                `json:"approved,omitempty"`
+	FlagColor       *FlagColor           `json:"flag_color,omitempty"`
+	ImportID        *string              `json:"import_id,omitempty"`
+	Subtransactions []SaveSubtransaction `json:"subtransactions,omitempty"`
 }
 
 type saveTransactionWrapper struct {
@@ -264,6 +265,15 @@ type saveTransactionsWrapper struct {
 
 type createTransactionResponseData struct {
 	Data CreateTransactionResponse `json:"data"`
+}
+
+// SaveSubtransaction is the request body for creating a sub-transaction. Amount is in milliunits.
+type SaveSubtransaction struct {
+	Amount     int64      `json:"amount"`
+	PayeeID    *uuid.UUID `json:"payee_id,omitempty"`
+	PayeeName  *string    `json:"payee_name,omitempty"`
+	CategoryID *uuid.UUID `json:"category_id,omitempty"`
+	Memo       *string    `json:"memo,omitempty"`
 }
 
 // CreateTransactionResponse is returned by CreateTransaction.

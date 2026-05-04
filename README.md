@@ -101,9 +101,9 @@ Available error types: `ErrUnauthorized`, `ErrForbidden`, `ErrNotFound`, `ErrRat
 - [x] Update transaction
 - [x] Update multiple transactions
 - [x] Update category budget
-- [ ] Delete transaction
-- [ ] Split transaction
-- [ ] Delta request
+- [x] Delete transaction
+- [x] Split transaction
+- [x] Delta request
 
 ## API Coverage
 

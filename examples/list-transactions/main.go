@@ -12,6 +12,7 @@ import (
 	"log"
 	"os"
 
+	"go-ynab/examples/internal/display"
 	"go-ynab/ynab"
 )
 
@@ -47,27 +48,5 @@ func main() {
 	}
 
 	fmt.Printf("Plan: %s  (%d transactions)\n\n", plan.Name, len(transactions))
-	fmt.Printf("%-12s  %-20s  %-25s  %13s\n", "Date", "Account", "Payee", "Amount")
-	fmt.Printf("%-12s  %-20s  %-25s  %13s\n", "------------", "--------------------",
-		"-------------------------", "-------------")
-
-	for _, tx := range transactions {
-		payee := ""
-		if tx.PayeeName != nil {
-			payee = *tx.PayeeName
-			if len(payee) > 25 {
-				payee = payee[:22] + "..."
-			}
-		}
-		account := tx.AccountName
-		if len(account) > 20 {
-			account = account[:17] + "..."
-		}
-		fmt.Printf("%-12s  %-20s  %-25s  %13s\n",
-			tx.Date,
-			account,
-			payee,
-			fmt.Sprintf("$%.2f", ynab.MilliunitsToAmount(tx.Amount)),
-		)
-	}
+	display.PrintTransactionTable(transactions)
 }
