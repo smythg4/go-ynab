@@ -28,4 +28,4 @@ jobs:
         run: go test ./...
 
       - name: Build integration tests
-        run: go build -tags integration ./integration/
+        run: go test -tags integration -run ^$ ./integration/
