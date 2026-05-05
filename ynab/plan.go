@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type PlanSummaryData struct {
+type planSummaryData struct {
 	Data struct {
 		Plans       []Plan `json:"plans"`
 		DefaultPlan *Plan  `json:"default_plan"`
@@ -65,7 +65,7 @@ type PlanDetails struct {
 
 // GetPlans returns all plans for the authenticated user.
 func (c *Client) GetPlans(ctx context.Context) ([]Plan, error) {
-	var result PlanSummaryData
+	var result planSummaryData
 	if err := c.get(ctx, "plans", nil, &result); err != nil {
 		return nil, err
 	}

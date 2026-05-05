@@ -20,7 +20,7 @@ func TestGetMoneyMovements(t *testing.T) {
 	t.Run("returns money movement list on success", func(t *testing.T) {
 		client, _ := newTestClient(movementListFixture, 200)
 
-		movements, err := client.GetMoneyMovements(context.Background(), uuid.New())
+		movements, _, err := client.GetMoneyMovements(context.Background(), uuid.New())
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}

@@ -47,13 +47,13 @@ type MoneyMovementGroup struct {
 // GET Methods using money movements
 
 // GetMoneyMovements returns all money movements for a plan.
-func (c *Client) GetMoneyMovements(ctx context.Context, planId uuid.UUID) ([]MoneyMovement, error) {
+func (c *Client) GetMoneyMovements(ctx context.Context, planId uuid.UUID) ([]MoneyMovement, int64, error) {
 	// TODO: Consider how to return the `ServerKnowledge` retrieved from the query
 	var result moneyMovementsData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/money_movements", planId), nil, &result); err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return result.Data.MoneyMovements, nil
+	return result.Data.MoneyMovements, result.Data.ServerKnowledge, nil
 }
 
 // GetMoneyMovementsByMonth returns money movements for a specific budget month.

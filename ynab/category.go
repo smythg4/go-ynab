@@ -73,6 +73,7 @@ type Category struct {
 	Deleted                 bool       `json:"deleted"`
 }
 
+// GoalType represents the type of savings or spending goal assigned to a category.
 type GoalType string
 
 const (

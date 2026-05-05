@@ -69,7 +69,7 @@ func (c *Client) GetPayee(ctx context.Context, planId, payeeId uuid.UUID) (*Paye
 	return &result.Data.Payee, nil
 }
 
-// GetPayeeLocationsByPayee returns all locations associated with a plan.
+// GetPayeeLocations returns all locations associated with a plan.
 func (c *Client) GetPayeeLocations(ctx context.Context, planId uuid.UUID) ([]PayeeLocation, error) {
 	var result payeeLocationsData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/payee_locations", planId), nil, &result); err != nil {
