@@ -48,6 +48,10 @@ func main() {
 }
 ```
 
+## Context
+
+All methods accept a `context.Context` as their first argument, enabling callers to cancel in-flight requests, enforce deadlines, and propagate request-scoped values through the call chain.
+
 ## Rate Limiting
 
 The [YNAB API](https://api.ynab.com/#rate-limiting) allows 200 requests per hour. `WithRateLimit` enables a token bucket limiter that automatically spaces requests to stay within that limit:
