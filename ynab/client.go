@@ -46,14 +46,18 @@ func NewClient(apiKey string) *Client {
 // WithRateLimit configures a token bucket rate limiter on the client.
 // The YNAB API enforces a rolling window of 200 requests per hour.
 //
-// Keep burstVolume small. A high burst (e.g. 200) lets the client exhaust
-// the rolling window instantly, after which YNAB will reject requests for up
-// to an hour while the token bucket continues issuing them. A small burst
-// (e.g. 10) keeps consumption spread out and avoids this divergence. Example:
+// burstVolume is the number of requests that can be made immediately before
+// throttling begins. To compensate, the sustained rate is reduced by burstVolume:
+// the effective rate becomes (requestsPerHour - burstVolume) per hour. This ensures
+// that burst consumption is accounted for and total usage stays within YNAB's limit.
+//
+// Example: WithRateLimit(200, 10) allows 10 immediate requests, then throttles to
+// 190 requests per hour — keeping total consumption safely under 200.
 //
 //	client := ynab.NewClient(apiKey).WithRateLimit(200, 10)
 func (c *Client) WithRateLimit(requestsPerHour, burstVolume int) *Client {
-	interval := time.Hour / time.Duration(requestsPerHour)
+	effectiveRate := requestsPerHour - burstVolume
+	interval := time.Hour / time.Duration(effectiveRate)
 	c.limiter = rate.NewLimiter(rate.Every(interval), burstVolume)
 	return c
 }

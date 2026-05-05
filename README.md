@@ -60,7 +60,7 @@ The [YNAB API](https://api.ynab.com/#rate-limiting) allows 200 requests per hour
 client := ynab.NewClient(os.Getenv("YNAB_TOKEN")).WithRateLimit(200, 10)
 ```
 
-The first argument is the request budget per hour; the second is the burst size — the number of requests that can be made immediately before throttling begins. Calls block until a token is available rather than returning an error, so no retry logic is needed on the caller's side.
+The first argument is the request budget per hour; the second is the burst size — the number of requests that can be made immediately before throttling begins. To keep total consumption within YNAB's limit, the sustained rate is reduced by the burst size: `WithRateLimit(200, 10)` allows 10 immediate requests, then throttles to 190 per hour. Calls block until a token is available rather than returning an error, so no retry logic is needed on the caller's side.
 
 Rate limiting is opt-in. Omit `WithRateLimit` for scripts or one-off tools where request volume is not a concern.
 

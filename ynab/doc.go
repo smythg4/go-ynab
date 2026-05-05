@@ -10,9 +10,11 @@
 // # Rate Limiting
 //
 // The YNAB API allows 200 requests per hour. Use WithRateLimit to enforce
-// this automatically:
+// this automatically. The sustained rate is reduced by the burst size so that
+// burst consumption is accounted for within the hourly limit:
 //
 //	client := ynab.NewClient(apiKey).WithRateLimit(200, 10)
+//	// allows 10 immediate requests, then throttles to 190/hr
 //
 // # Error Handling
 //
