@@ -39,6 +39,32 @@ func TestGetPlans(t *testing.T) {
 	}
 }
 
+func TestGetPlansIncludeAccounts(t *testing.T) {
+	client, transport := newTestClient(planListFixture, 200)
+
+	plans, err := client.GetPlans(context.Background(), true)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(plans) != 2 {
+		t.Fatalf("expected 2 plans, got %d", len(plans))
+	}
+
+	idWant := uuid.MustParse(testID1)
+	if plans[0].ID != idWant {
+		t.Errorf("got ID %v, want %v", plans[0].ID, idWant)
+	}
+
+	if plans[0].Name != "Bunko Budget" {
+		t.Errorf("got Name %v, want Bunko Budget", plans[0].Name)
+	}
+
+	if transport.lastReq.URL.Query().Get("include_accounts") != "true" {
+		t.Errorf("expected query parameter `include_accounts` to be 'true', got: %s", transport.lastReq.URL.Query().Get("include_accounts"))
+	}
+}
+
 func TestGetPlan(t *testing.T) {
 	client, _ := newTestClient(planDetailsFixture, 200)
 
