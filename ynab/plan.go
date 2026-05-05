@@ -83,6 +83,18 @@ func (c *Client) GetPlan(ctx context.Context, id uuid.UUID) (*PlanDetails, error
 	return &result.Data.Plan, nil
 }
 
+// GetLastUsedPlan returns the full export for the most recently used plan
+// for the authenticated user. Use the returned plan's ID for subsequent
+// sub-resource calls (GetAccounts, GetTransactions, etc.) — there is no
+// "last-used" shortcut for sub-resource endpoints.
+func (c *Client) GetLastUsedPlan(ctx context.Context) (*PlanDetails, error) {
+	var result planDetailsData
+	if err := c.get(ctx, "plans/last-used", nil, &result); err != nil {
+		return nil, err
+	}
+	return &result.Data.Plan, nil
+}
+
 // GetPlanSettings returns the date and currency format settings for a plan.
 func (c *Client) GetPlanSettings(ctx context.Context, id uuid.UUID) (*PlanSettings, error) {
 	var result planSettingsData

@@ -2,6 +2,7 @@ package ynab
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/google/uuid"
@@ -53,6 +54,24 @@ func TestGetPlan(t *testing.T) {
 
 	if plan.Name != "Bunko Budget" {
 		t.Errorf("got Name %v, want Bunko Budget", plan.Name)
+	}
+}
+
+func TestGetLastUsedPlan(t *testing.T) {
+	client, transport := newTestClient(planDetailsFixture, 200)
+
+	plan, err := client.GetLastUsedPlan(context.Background())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	want := uuid.MustParse(testID1)
+	if plan.ID != want {
+		t.Errorf("got ID %v, want %v", plan.ID, want)
+	}
+
+	if !strings.HasSuffix(transport.lastReq.URL.Path, "/plans/last-used") {
+		t.Errorf("unexpected path %v", transport.lastReq.URL.Path)
 	}
 }
 

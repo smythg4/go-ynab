@@ -119,6 +119,7 @@ Available error types: `ErrBadRequest`, `ErrUnauthorized`, `ErrForbidden`, `ErrN
 |--------|----------|
 | `GetPlans` | `GET /plans` |
 | `GetPlan` | `GET /plans/{plan_id}` |
+| `GetLastUsedPlan` | `GET /plans/last-used` |
 | `GetPlanSettings` | `GET /plans/{plan_id}/settings` |
 
 ### Accounts
