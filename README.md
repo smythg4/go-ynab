@@ -1,5 +1,7 @@
 # ynab-go
-
+[![Go Report Card](https://goreportcard.com/badge/github.com/smythg4/go-ynab)](https://goreportcard.com/report/github.com/smythg4/go-ynab)
+[![GoDoc](https://pkg.go.dev/badge/github.com/smythg4/go-ynab/ynab.svg)](https://pkg.go.dev/github.com/smythg4/go-ynab/ynab)
+  
 A Go client for the [YNAB API](https://api.ynab.com). Supports full access  to all published YNAB API endpoints. Requires a YNAB account and a [Personal Access Token](https://app.ynab.com/settings/developer).
 
 ## Installation

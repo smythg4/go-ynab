@@ -17,6 +17,22 @@ import (
 	"github.com/smythg4/go-ynab/ynab"
 )
 
+func firstEligibleCategory(groups []ynab.CategoryGroup) *ynab.Category {
+	for _, group := range groups {
+		// Skip groups that don't allow budget updates
+		if group.Hidden || group.Deleted || group.Name == "Internal Master Category" {
+			continue
+		}
+		for i := range group.Categories {
+			c := &group.Categories[i]
+			if !c.Hidden && !c.Deleted {
+				return c
+			}
+		}
+	}
+	return nil
+}
+
 func main() {
 	token := os.Getenv("YNAB_TOKEN")
 	if token == "" {
@@ -41,23 +57,7 @@ func main() {
 		log.Fatalf("failed to get categories: %v", err)
 	}
 
-	var cat *ynab.Category
-	for _, group := range catGroups {
-		// Skip category groups that don't allow updates
-		if group.Hidden || group.Deleted || group.Name == "Internal Master Category" {
-			continue
-		}
-		for i := range group.Categories {
-			c := &group.Categories[i]
-			if !c.Hidden && !c.Deleted {
-				cat = c
-				break
-			}
-		}
-		if cat != nil {
-			break
-		}
-	}
+	cat := firstEligibleCategory(catGroups)
 	if cat == nil {
 		fmt.Println("no eligible categories found")
 		return
