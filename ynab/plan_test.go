@@ -17,68 +17,58 @@ const planDetailsFixture = `{"data":{"plan":{"id":"` + testID1 + `","name":"Bunk
 const planSettingsFixture = `{"data":{"settings":{` + currencyFormatFixture + `}}}`
 
 func TestGetPlans(t *testing.T) {
-	t.Run("returns plan list on success", func(t *testing.T) {
-		client, _ := newTestClient(planListFixture, 200)
+	client, _ := newTestClient(planListFixture, 200)
 
-		plans, err := client.GetPlans(context.Background())
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
+	plans, err := client.GetPlans(context.Background())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
-		if len(plans) != 2 {
-			t.Fatalf("expected 2 plans, got %d", len(plans))
-		}
+	if len(plans) != 2 {
+		t.Fatalf("expected 2 plans, got %d", len(plans))
+	}
 
-		idWant := uuid.MustParse(testID1)
-		if plans[0].ID != idWant {
-			t.Errorf("got ID %v, want %v", plans[0].ID, idWant)
-		}
+	idWant := uuid.MustParse(testID1)
+	if plans[0].ID != idWant {
+		t.Errorf("got ID %v, want %v", plans[0].ID, idWant)
+	}
 
-		nameWant := "Bunko Budget"
-		if plans[0].Name != nameWant {
-			t.Errorf("got Name %v, want %v", plans[0].Name, nameWant)
-		}
-	})
+	if plans[0].Name != "Bunko Budget" {
+		t.Errorf("got Name %v, want Bunko Budget", plans[0].Name)
+	}
 }
 
 func TestGetPlan(t *testing.T) {
-	t.Run("returns plan details on success", func(t *testing.T) {
-		client, _ := newTestClient(planDetailsFixture, 200)
+	client, _ := newTestClient(planDetailsFixture, 200)
 
-		plan, err := client.GetPlan(context.Background(), uuid.New())
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
+	plan, err := client.GetPlan(context.Background(), uuid.New())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
-		want := uuid.MustParse(testID1)
-		if plan.ID != want {
-			t.Errorf("got ID %v, want %v", plan.ID, want)
-		}
+	want := uuid.MustParse(testID1)
+	if plan.ID != want {
+		t.Errorf("got ID %v, want %v", plan.ID, want)
+	}
 
-		nameWant := "Bunko Budget"
-		if plan.Name != nameWant {
-			t.Errorf("got Name %v, want %v", plan.Name, nameWant)
-		}
-	})
+	if plan.Name != "Bunko Budget" {
+		t.Errorf("got Name %v, want Bunko Budget", plan.Name)
+	}
 }
 
 func TestGetPlanSettings(t *testing.T) {
-	t.Run("returns plan settings on success", func(t *testing.T) {
-		client, _ := newTestClient(planSettingsFixture, 200)
+	client, _ := newTestClient(planSettingsFixture, 200)
 
-		settings, err := client.GetPlanSettings(context.Background(), uuid.New())
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
+	settings, err := client.GetPlanSettings(context.Background(), uuid.New())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
-		dateFormatWant := "MM/DD/YYYY"
-		if settings.DateFormat.Format != dateFormatWant {
-			t.Errorf("got DateFormat.Format %v, want %v", settings.DateFormat.Format, dateFormatWant)
-		}
+	if settings.DateFormat.Format != "MM/DD/YYYY" {
+		t.Errorf("got DateFormat.Format %v, want MM/DD/YYYY", settings.DateFormat.Format)
+	}
 
-		isoCodeWant := "USD"
-		if settings.CurrencyFormat.IsoCode != isoCodeWant {
-			t.Errorf("got CurrencyFormat.IsoCode %v, want %v", settings.CurrencyFormat.IsoCode, isoCodeWant)
-		}
-	})
+	if settings.CurrencyFormat.IsoCode != "USD" {
+		t.Errorf("got CurrencyFormat.IsoCode %v, want USD", settings.CurrencyFormat.IsoCode)
+	}
 }

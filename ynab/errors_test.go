@@ -16,6 +16,14 @@ func TestNewAPIError(t *testing.T) {
 		errChecker func(error) bool
 	}{
 		{
+			name:   "400 returns ErrBadRequest",
+			status: http.StatusBadRequest,
+			errChecker: func(err error) bool {
+				var target ErrBadRequest
+				return errors.As(err, &target)
+			},
+		},
+		{
 			name:   "401 returns ErrUnauthorized",
 			status: http.StatusUnauthorized,
 			errChecker: func(err error) bool {
@@ -36,6 +44,14 @@ func TestNewAPIError(t *testing.T) {
 			status: http.StatusNotFound,
 			errChecker: func(err error) bool {
 				var target ErrNotFound
+				return errors.As(err, &target)
+			},
+		},
+		{
+			name:   "409 returns ErrConflict",
+			status: http.StatusConflict,
+			errChecker: func(err error) bool {
+				var target ErrConflict
 				return errors.As(err, &target)
 			},
 		},

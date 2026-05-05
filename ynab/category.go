@@ -14,12 +14,6 @@ type categoryData struct {
 	} `json:"data"`
 }
 
-type monthCategoryData struct {
-	Data struct {
-		Category Category `json:"category"`
-	} `json:"data"`
-}
-
 type categoriesData struct {
 	Data struct {
 		CategoryGroups  []CategoryGroup `json:"category_groups"`

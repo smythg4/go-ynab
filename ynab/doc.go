@@ -24,6 +24,6 @@
 //	    // handle 404
 //	}
 //
-// Available error types: ErrUnauthorized, ErrForbidden, ErrNotFound,
-// ErrRateLimit, ErrServerError, ErrServiceUnavailable.
+// Available error types: ErrBadRequest, ErrUnauthorized, ErrForbidden,
+// ErrNotFound, ErrConflict, ErrRateLimit, ErrServerError, ErrServiceUnavailable.
 package ynab

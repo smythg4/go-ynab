@@ -20,6 +20,15 @@ func (e APIError) Error() string {
 	return fmt.Sprintf("(%s)%s: %s", e.ID, e.Name, e.Detail)
 }
 
+// ErrBadRequest is returned when the request is malformed or fails validation (400).
+type ErrBadRequest struct {
+	APIError
+}
+
+func (e ErrBadRequest) Error() string {
+	return fmt.Sprintf("bad request (%s): %s", e.ID, e.Detail)
+}
+
 // ErrUnauthorized is returned when the API token is missing or invalid (401).
 type ErrUnauthorized struct {
 	APIError
@@ -65,6 +74,15 @@ func (e ErrServerError) Error() string {
 	return fmt.Sprintf("server error (%s): %s", e.ID, e.Detail)
 }
 
+// ErrConflict is returned when a resource cannot be saved due to a conflict with an existing resource (409).
+type ErrConflict struct {
+	APIError
+}
+
+func (e ErrConflict) Error() string {
+	return fmt.Sprintf("conflict (%s): %s", e.ID, e.Detail)
+}
+
 // ErrServiceUnavailable is returned when the YNAB API is temporarily unavailable (503).
 type ErrServiceUnavailable struct {
 	APIError
@@ -76,14 +94,18 @@ func (e ErrServiceUnavailable) Error() string {
 
 func newAPIError(status int, apiErr APIError) error {
 	switch status {
+	case http.StatusBadRequest:
+		return ErrBadRequest{apiErr}
 	case http.StatusUnauthorized:
 		return ErrUnauthorized{apiErr}
-	case http.StatusTooManyRequests:
-		return ErrRateLimit{apiErr}
-	case http.StatusNotFound:
-		return ErrNotFound{apiErr}
 	case http.StatusForbidden:
 		return ErrForbidden{apiErr}
+	case http.StatusNotFound:
+		return ErrNotFound{apiErr}
+	case http.StatusConflict:
+		return ErrConflict{apiErr}
+	case http.StatusTooManyRequests:
+		return ErrRateLimit{apiErr}
 	case http.StatusInternalServerError:
 		return ErrServerError{apiErr}
 	case http.StatusServiceUnavailable:
