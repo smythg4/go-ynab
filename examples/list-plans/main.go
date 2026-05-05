@@ -24,7 +24,7 @@ func main() {
 
 	client := ynab.NewClient(token)
 
-	plans, err := client.GetPlans(context.Background())
+	plans, err := client.GetPlans(context.Background(), false)
 	if err != nil {
 		log.Fatalf("failed to get plans: %v", err)
 	}

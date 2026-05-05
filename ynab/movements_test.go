@@ -19,7 +19,7 @@ const movementGroupListFixture = `{"data":{"money_movement_groups":[` + movement
 func TestGetMoneyMovements(t *testing.T) {
 	client, _ := newTestClient(movementListFixture, 200)
 
-	movements, _, err := client.GetMoneyMovements(context.Background(), uuid.New())
+	movements, _, err := client.GetMoneyMovements(context.Background(), uuid.New(), nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -59,7 +59,7 @@ func TestGetMoneyMovementsByMonth(t *testing.T) {
 func TestGetMoneyMovementGroups(t *testing.T) {
 	client, _ := newTestClient(movementGroupListFixture, 200)
 
-	groups, serverKnowledge, err := client.GetMoneyMovementGroups(context.Background(), uuid.New())
+	groups, serverKnowledge, err := client.GetMoneyMovementGroups(context.Background(), uuid.New(), nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

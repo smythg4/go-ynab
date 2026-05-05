@@ -47,10 +47,10 @@ type MoneyMovementGroup struct {
 // GET Methods using money movements
 
 // GetMoneyMovements returns all money movements for a plan.
-func (c *Client) GetMoneyMovements(ctx context.Context, planId uuid.UUID) ([]MoneyMovement, int64, error) {
-	// TODO: Consider how to return the `ServerKnowledge` retrieved from the query
+// The second return value is server knowledge for delta requests.
+func (c *Client) GetMoneyMovements(ctx context.Context, planId uuid.UUID, params *ListParams) ([]MoneyMovement, int64, error) {
 	var result moneyMovementsData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/money_movements", planId), nil, &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/money_movements", planId), buildListParams(params), &result); err != nil {
 		return nil, -1, err
 	}
 	return result.Data.MoneyMovements, result.Data.ServerKnowledge, nil
@@ -66,9 +66,10 @@ func (c *Client) GetMoneyMovementsByMonth(ctx context.Context, planId uuid.UUID,
 }
 
 // GetMoneyMovementGroups returns all money movement groups for a plan.
-func (c *Client) GetMoneyMovementGroups(ctx context.Context, planId uuid.UUID) ([]MoneyMovementGroup, int64, error) {
+// The second return value is server knowledge for delta requests.
+func (c *Client) GetMoneyMovementGroups(ctx context.Context, planId uuid.UUID, params *ListParams) ([]MoneyMovementGroup, int64, error) {
 	var result moneyMovementGroupData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/money_movement_groups", planId), nil, &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/money_movement_groups", planId), buildListParams(params), &result); err != nil {
 		return nil, -1, err
 	}
 	return result.Data.MoneyMovementGroups, result.Data.ServerKnowledge, nil

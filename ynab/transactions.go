@@ -220,9 +220,10 @@ func (c *Client) GetTransactionsByMonth(ctx context.Context, planId uuid.UUID, m
 }
 
 // GetScheduledTransactions returns all scheduled transactions for a plan.
-func (c *Client) GetScheduledTransactions(ctx context.Context, planId uuid.UUID) ([]ScheduledTransaction, int64, error) {
+// The second return value is server knowledge for delta requests.
+func (c *Client) GetScheduledTransactions(ctx context.Context, planId uuid.UUID, params *ListParams) ([]ScheduledTransaction, int64, error) {
 	var result scheduledTransactionsData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/scheduled_transactions", planId), nil, &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/scheduled_transactions", planId), buildListParams(params), &result); err != nil {
 		return nil, -1, err
 	}
 	return result.Data.ScheduledTransactions, result.Data.ServerKnowledge, nil

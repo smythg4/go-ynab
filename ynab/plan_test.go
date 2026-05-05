@@ -20,7 +20,7 @@ const planSettingsFixture = `{"data":{"settings":{` + currencyFormatFixture + `}
 func TestGetPlans(t *testing.T) {
 	client, _ := newTestClient(planListFixture, 200)
 
-	plans, err := client.GetPlans(context.Background())
+	plans, err := client.GetPlans(context.Background(), false)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -42,7 +42,7 @@ func TestGetPlans(t *testing.T) {
 func TestGetPlan(t *testing.T) {
 	client, _ := newTestClient(planDetailsFixture, 200)
 
-	plan, err := client.GetPlan(context.Background(), uuid.New())
+	plan, sk, err := client.GetPlan(context.Background(), uuid.New(), nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -54,6 +54,10 @@ func TestGetPlan(t *testing.T) {
 
 	if plan.Name != "Bunko Budget" {
 		t.Errorf("got Name %v, want Bunko Budget", plan.Name)
+	}
+
+	if sk != 42 {
+		t.Errorf("got server_knowledge %v, want 42", sk)
 	}
 }
 

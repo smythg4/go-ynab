@@ -16,7 +16,7 @@ const monthSingleFixture = `{"data":{"month":` + monthFixture + `}}`
 func TestGetMonths(t *testing.T) {
 	client, _ := newTestClient(monthListFixture, 200)
 
-	months, serverKnowledge, err := client.GetMonths(context.Background(), uuid.New())
+	months, serverKnowledge, err := client.GetMonths(context.Background(), uuid.New(), nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

@@ -42,7 +42,7 @@ func main() {
 	client := ynab.NewClient(token)
 	ctx := context.Background()
 
-	plans, err := client.GetPlans(ctx)
+	plans, err := client.GetPlans(ctx, false)
 	if err != nil {
 		log.Fatalf("failed to get plans: %v", err)
 	}
@@ -52,7 +52,7 @@ func main() {
 	}
 	planId := plans[0].ID
 
-	catGroups, _, err := client.GetCategories(ctx, planId)
+	catGroups, _, err := client.GetCategories(ctx, planId, nil)
 	if err != nil {
 		log.Fatalf("failed to get categories: %v", err)
 	}

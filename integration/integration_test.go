@@ -46,6 +46,62 @@ func firstAccountID(t *testing.T, client *ynab.Client, planID uuid.UUID) uuid.UU
 	return accounts[0].ID
 }
 
+func TestGetTransactions_DeltaRequest(t *testing.T) {
+	client, planID := setup(t)
+	ctx := context.Background()
+	accountID := firstAccountID(t, client, planID)
+
+	_, sk, err := client.GetTransactions(ctx, planID, nil)
+	if err != nil {
+		t.Fatalf("GetTransactions (initial): %v", err)
+	}
+	if sk <= 0 {
+		t.Fatalf("expected server_knowledge > 0, got %d", sk)
+	}
+	t.Logf("initial server_knowledge=%d", sk)
+
+	memo1, memo2 := "integration delta request test 1", "integration delta request test 2"
+	created, err := client.CreateTransactions(ctx, planID, []ynab.SaveTransaction{
+		{AccountID: accountID, Date: ynab.NewDate(time.Now().Date()), Amount: -1000, Memo: &memo1, Cleared: ynab.ClearedStatusUncleared},
+		{AccountID: accountID, Date: ynab.NewDate(time.Now().Date()), Amount: -2000, Memo: &memo2, Cleared: ynab.ClearedStatusUncleared},
+	})
+	if err != nil {
+		t.Fatalf("CreateTransactions: %v", err)
+	}
+	if len(created.TransactionIDs) != 2 {
+		t.Fatalf("expected 2 created transaction IDs, got %d", len(created.TransactionIDs))
+	}
+	for _, id := range created.TransactionIDs {
+		id := id
+		t.Cleanup(func() {
+			if _, err := client.DeleteTransaction(ctx, planID, id); err != nil {
+				t.Logf("cleanup: DeleteTransaction %s: %v", id, err)
+			}
+		})
+	}
+	t.Logf("created transactions %v", created.TransactionIDs)
+
+	createdIDs := map[string]bool{
+		created.TransactionIDs[0]: true,
+		created.TransactionIDs[1]: true,
+	}
+
+	delta, _, err := client.GetTransactions(ctx, planID, &ynab.TransactionListParams{
+		LastKnowledgeOfServer: &sk,
+	})
+	if err != nil {
+		t.Fatalf("GetTransactions (delta): %v", err)
+	}
+	if len(delta) != 2 {
+		t.Fatalf("expected 2 transactions in delta response, got %d", len(delta))
+	}
+	for _, tx := range delta {
+		if !createdIDs[tx.ID] {
+			t.Errorf("unexpected transaction %s in delta response", tx.ID)
+		}
+	}
+}
+
 func TestGetTransactions_Smoke(t *testing.T) {
 	client, planID := setup(t)
 
@@ -77,11 +133,11 @@ func TestTransaction_CreateGetDelete(t *testing.T) {
 	}
 	txID := created.Transaction.ID
 	t.Logf("created transaction %s", txID)
-	t.Cleanup(func() {
-		if _, err := client.DeleteTransaction(ctx, planID, txID); err != nil {
-			t.Logf("cleanup: DeleteTransaction %s: %v", txID, err)
-		}
-	})
+	// t.Cleanup(func() {
+	// 	if _, err := client.DeleteTransaction(ctx, planID, txID); err != nil {
+	// 		t.Logf("cleanup: DeleteTransaction %s: %v", txID, err)
+	// 	}
+	// })
 
 	fetched, err := client.GetTransaction(ctx, planID, txID)
 	if err != nil {

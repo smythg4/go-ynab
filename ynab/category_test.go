@@ -20,7 +20,7 @@ const categorySingleFixture = `{"data":{"category":` + categoryFixture + `}}`
 func TestGetCategories(t *testing.T) {
 	client, _ := newTestClient(categoryGroupListFixture, 200)
 
-	groups, serverKnowledge, err := client.GetCategories(context.Background(), uuid.New())
+	groups, serverKnowledge, err := client.GetCategories(context.Background(), uuid.New(), nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

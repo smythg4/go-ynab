@@ -19,7 +19,7 @@ const payeeLocationSingleFixture = `{"data":{"payee_location":` + payeeLocationF
 func TestGetPayees(t *testing.T) {
 	client, _ := newTestClient(payeeListFixture, 200)
 
-	payees, serverKnowledge, err := client.GetPayees(context.Background(), uuid.New())
+	payees, serverKnowledge, err := client.GetPayees(context.Background(), uuid.New(), nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

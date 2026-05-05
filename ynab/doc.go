@@ -20,7 +20,7 @@
 //
 // API errors are returned as typed errors inspectable with errors.As:
 //
-//	_, err := client.GetPlan(ctx, id)
+//	_, _, err := client.GetPlan(ctx, id, nil)
 //	var notFound ynab.ErrNotFound
 //	if errors.As(err, &notFound) {
 //	    // handle 404

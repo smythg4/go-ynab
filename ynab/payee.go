@@ -52,9 +52,9 @@ type PayeeLocation struct {
 // GET Methods using payees
 
 // GetPayees returns all payees for a plan. The second return value is server knowledge for delta requests.
-func (c *Client) GetPayees(ctx context.Context, planId uuid.UUID) ([]Payee, int64, error) {
+func (c *Client) GetPayees(ctx context.Context, planId uuid.UUID, params *ListParams) ([]Payee, int64, error) {
 	var result payeesData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/payees", planId), nil, &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/payees", planId), buildListParams(params), &result); err != nil {
 		return nil, -1, err
 	}
 	return result.Data.Payees, result.Data.ServerKnowledge, nil

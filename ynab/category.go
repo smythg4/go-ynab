@@ -82,9 +82,9 @@ const (
 
 // GetCategories returns all category groups and their categories for a plan.
 // The second return value is server knowledge for delta requests.
-func (c *Client) GetCategories(ctx context.Context, planId uuid.UUID) ([]CategoryGroup, int64, error) {
+func (c *Client) GetCategories(ctx context.Context, planId uuid.UUID, params *ListParams) ([]CategoryGroup, int64, error) {
 	var result categoriesData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/categories", planId), nil, &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/categories", planId), buildListParams(params), &result); err != nil {
 		return nil, -1, err
 	}
 	return result.Data.CategoryGroups, result.Data.ServerKnowledge, nil

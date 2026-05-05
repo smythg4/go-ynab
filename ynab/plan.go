@@ -3,6 +3,7 @@ package ynab
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/google/uuid"
@@ -63,24 +64,31 @@ type PlanDetails struct {
 
 // GET Methods using plans
 
-// GetPlans returns all plans for the authenticated user.
-func (c *Client) GetPlans(ctx context.Context) ([]Plan, error) {
+// GetPlans returns all plans for the authenticated user. includeAccounts flag indicates
+// whether you want the returned payload to include all the account information for each
+// plan.
+func (c *Client) GetPlans(ctx context.Context, includeAccounts bool) ([]Plan, error) {
+	q := url.Values{}
+	if includeAccounts {
+		q.Set("include_accounts", "true")
+	}
 	var result planSummaryData
-	if err := c.get(ctx, "plans", nil, &result); err != nil {
+	if err := c.get(ctx, "plans", q, &result); err != nil {
 		return nil, err
 	}
 	return result.Data.Plans, nil
 }
 
 // GetPlan returns the full export for the given plan, including all
-// sub-resources. For large plans this response can be substantial —
+// sub-resources. The second return value is server knowledge for delta requests.
+// For large plans this response can be substantial —
 // consider using specific resource endpoints for targeted queries.
-func (c *Client) GetPlan(ctx context.Context, id uuid.UUID) (*PlanDetails, error) {
+func (c *Client) GetPlan(ctx context.Context, id uuid.UUID, params *ListParams) (*PlanDetails, int64, error) {
 	var result planDetailsData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s", id), nil, &result); err != nil {
-		return nil, err
+	if err := c.get(ctx, fmt.Sprintf("plans/%s", id), buildListParams(params), &result); err != nil {
+		return nil, -1, err
 	}
-	return &result.Data.Plan, nil
+	return &result.Data.Plan, result.Data.ServerKnowledge, nil
 }
 
 // GetLastUsedPlan returns the full export for the most recently used plan

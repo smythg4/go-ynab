@@ -168,7 +168,7 @@ func TestGetTransactionsByMonth(t *testing.T) {
 func TestGetScheduledTransactions(t *testing.T) {
 	client, _ := newTestClient(scheduledTxListFixture, 200)
 
-	txs, serverKnowledge, err := client.GetScheduledTransactions(context.Background(), uuid.New())
+	txs, serverKnowledge, err := client.GetScheduledTransactions(context.Background(), uuid.New(), nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

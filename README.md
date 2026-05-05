@@ -26,25 +26,28 @@ client := ynab.NewClient(os.Getenv("YNAB_TOKEN"))
 package main
 
 import (
-    "context"
-    "fmt"
-    "log"
-    "os"
+	"context"
+	"fmt"
+	"log"
+	"os"
 
-    "github.com/smythg4/go-ynab/ynab"
+	"github.com/smythg4/go-ynab/ynab"
 )
 
 func main() {
-    client := ynab.NewClient(os.Getenv("YNAB_TOKEN"))
+	client := ynab.NewClient(os.Getenv("YNAB_TOKEN"))
 
-    plans, err := client.GetPlans(context.Background())
-    if err != nil {
-        log.Fatal(err)
-    }
+	plans, err := client.GetPlans(context.Background(), true) // include account information in the return
+	if err != nil {
+		log.Fatal(err)
+	}
 
-    for _, plan := range plans {
-        fmt.Println(plan.Name)
-    }
+	for _, plan := range plans {
+		fmt.Println(plan.Name)
+		for _, acct := range plan.Accounts {
+			fmt.Printf("   %s\n", acct.Name)
+		}
+	}
 }
 ```
 

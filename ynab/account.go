@@ -3,7 +3,6 @@ package ynab
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"time"
 
 	"github.com/google/uuid"
@@ -56,12 +55,8 @@ type Account struct {
 
 // GetAccounts returns all accounts for a plan. The second return value is server knowledge for delta requests.
 func (c *Client) GetAccounts(ctx context.Context, planId uuid.UUID, params *ListParams) ([]Account, int64, error) {
-	q := url.Values{}
-	if params != nil && params.LastKnowledgeOfServer != nil {
-		q.Set("last_knowledge_of_server", fmt.Sprintf("%d", *params.LastKnowledgeOfServer))
-	}
 	var result accountsData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/accounts", planId), q, &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/accounts", planId), buildListParams(params), &result); err != nil {
 		return nil, -1, err
 	}
 	return result.Data.Accounts, result.Data.ServerKnowledge, nil
