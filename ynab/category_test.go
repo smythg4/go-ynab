@@ -84,9 +84,10 @@ func TestCreateCategory(t *testing.T) {
 	client, transport := newTestClient(categorySingleFixture, 201)
 
 	groupID := uuid.MustParse("223e4567-e89b-12d3-a456-426614174000")
+	name := "Groceries"
 	category, _, err := client.CreateCategory(context.Background(), uuid.New(), SaveCategory{
-		CategoryGroupID: groupID,
-		Name:            "Groceries",
+		CategoryGroupID: &groupID,
+		Name:            &name,
 	})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -105,8 +106,8 @@ func TestCreateCategory(t *testing.T) {
 	if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
 		t.Fatalf("could not unmarshal request body: %v", err)
 	}
-	if payload.Category.Name != "Groceries" {
-		t.Errorf("got payload name %v, want Groceries", payload.Category.Name)
+	if *payload.Category.Name != "Groceries" {
+		t.Errorf("got payload name %v, want Groceries", *payload.Category.Name)
 	}
 }
 
@@ -143,9 +144,10 @@ func TestUpdateCategory(t *testing.T) {
 	client, transport := newTestClient(categorySingleFixture, 200)
 
 	groupID := uuid.MustParse("223e4567-e89b-12d3-a456-426614174000")
+	name := "Groceries"
 	category, _, err := client.UpdateCategory(context.Background(), uuid.New(), uuid.New(), SaveCategory{
-		CategoryGroupID: groupID,
-		Name:            "Groceries",
+		CategoryGroupID: &groupID,
+		Name:            &name,
 	})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -163,8 +165,8 @@ func TestUpdateCategory(t *testing.T) {
 	if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
 		t.Fatalf("could not unmarshal request body: %v", err)
 	}
-	if payload.Category.Name != "Groceries" {
-		t.Errorf("got payload name %v, want Groceries", payload.Category.Name)
+	if *payload.Category.Name != "Groceries" {
+		t.Errorf("got payload name %v, want Groceries", *payload.Category.Name)
 	}
 }
 

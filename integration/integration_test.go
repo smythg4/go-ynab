@@ -306,24 +306,26 @@ func TestCategory_CreateAndUpdate(t *testing.T) {
 	}
 	t.Logf("created category group %s", group.ID)
 
+	catName := "integration-test-category"
 	cat, _, err := client.CreateCategory(ctx, planID, ynab.SaveCategory{
-		CategoryGroupID: group.ID,
-		Name:            "integration-test-category",
+		CategoryGroupID: &group.ID,
+		Name:            &catName,
 	})
 	if err != nil {
 		t.Fatalf("CreateCategory: %v", err)
 	}
 	t.Logf("created category %s", cat.ID)
 
+	updatedCatName := "integration-test-category (updated)"
 	updatedCat, _, err := client.UpdateCategory(ctx, planID, cat.ID, ynab.SaveCategory{
-		CategoryGroupID: group.ID,
-		Name:            "integration-test-category (updated)",
+		CategoryGroupID: &group.ID,
+		Name:            &updatedCatName,
 	})
 	if err != nil {
 		t.Fatalf("UpdateCategory: %v", err)
 	}
-	if updatedCat.Name != "integration-test-category (updated)" {
-		t.Errorf("got Name %q, want %q", updatedCat.Name, "integration-test-category (updated)")
+	if updatedCat.Name != updatedCatName {
+		t.Errorf("got Name %q, want %q", updatedCat.Name, updatedCatName)
 	}
 
 	updatedGroup, _, err := client.UpdateCategoryGroup(ctx, planID, group.ID, ynab.SaveCategoryGroup{

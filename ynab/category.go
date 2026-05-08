@@ -112,13 +112,14 @@ func (c *Client) GetCategoryForMonth(ctx context.Context, planId uuid.UUID, mont
 // POST Methods and infrastructure using categories
 
 // SaveCategory is the request body for creating or updating a category.
+// All fields are optional to support partial PATCH updates; omitted fields are not changed server-side.
 type SaveCategory struct {
-	CategoryGroupID      uuid.UUID `json:"category_group_id"`
-	Name                 string    `json:"name"`
-	Note                 *string   `json:"note,omitempty"`
-	GoalNeedsWholeAmount *bool     `json:"goal_needs_whole_amount,omitempty"`
-	GoalTarget           *int64    `json:"goal_target,omitempty"`
-	GoalTargetDate       *Date     `json:"goal_target_date,omitempty"`
+	CategoryGroupID      *uuid.UUID `json:"category_group_id,omitempty"`
+	Name                 *string    `json:"name,omitempty"`
+	Note                 *string    `json:"note,omitempty"`
+	GoalNeedsWholeAmount *bool      `json:"goal_needs_whole_amount,omitempty"`
+	GoalTarget           *int64     `json:"goal_target,omitempty"`
+	GoalTargetDate       *Date      `json:"goal_target_date,omitempty"`
 }
 
 type saveCategoryWrapper struct {

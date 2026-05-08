@@ -38,9 +38,14 @@ type Transaction struct {
 	PayeeName            *string          `json:"payee_name"`
 	CategoryID           *uuid.UUID       `json:"category_id"`
 	CategoryName         *string          `json:"category_name"`
-	MatchedTransactionID *string          `json:"matched_transaction_id"`
-	Subtransactions      []Subtransaction `json:"subtransactions"`
-	Deleted              bool             `json:"deleted"`
+	MatchedTransactionID    *string          `json:"matched_transaction_id"`
+	TransferAccountID       *uuid.UUID       `json:"transfer_account_id"`
+	TransferTransactionID   *string          `json:"transfer_transaction_id"`
+	ImportID                *string          `json:"import_id"`
+	ImportPayeeName         *string          `json:"import_payee_name"`
+	ImportPayeeNameOriginal *string          `json:"import_payee_name_original"`
+	Subtransactions         []Subtransaction `json:"subtransactions"`
+	Deleted                 bool             `json:"deleted"`
 }
 
 // Subtransaction is a line item within a split transaction.
