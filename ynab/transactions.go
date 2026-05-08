@@ -24,20 +24,20 @@ type transactionsData struct {
 
 // Transaction represents a single YNAB transaction. Amounts are in milliunits (divide by 1000 for display).
 type Transaction struct {
-	ID                   string           `json:"id"`
-	Date                 Date             `json:"date"`
-	Amount               int64            `json:"amount"`
-	Memo                 *string          `json:"memo"`
-	Cleared              ClearedStatus    `json:"cleared"`
-	Approved             bool             `json:"approved"`
-	FlagColor            *FlagColor       `json:"flag_color"`
-	FlagName             *string          `json:"flag_name"`
-	AccountID            uuid.UUID        `json:"account_id"`
-	PayeeID              *uuid.UUID       `json:"payee_id"`
-	AccountName          string           `json:"account_name"`
-	PayeeName            *string          `json:"payee_name"`
-	CategoryID           *uuid.UUID       `json:"category_id"`
-	CategoryName         *string          `json:"category_name"`
+	ID                      string           `json:"id"`
+	Date                    Date             `json:"date"`
+	Amount                  int64            `json:"amount"`
+	Memo                    *string          `json:"memo"`
+	Cleared                 ClearedStatus    `json:"cleared"`
+	Approved                bool             `json:"approved"`
+	FlagColor               *FlagColor       `json:"flag_color"`
+	FlagName                *string          `json:"flag_name"`
+	AccountID               uuid.UUID        `json:"account_id"`
+	PayeeID                 *uuid.UUID       `json:"payee_id"`
+	AccountName             string           `json:"account_name"`
+	PayeeName               *string          `json:"payee_name"`
+	CategoryID              *uuid.UUID       `json:"category_id"`
+	CategoryName            *string          `json:"category_name"`
 	MatchedTransactionID    *string          `json:"matched_transaction_id"`
 	TransferAccountID       *uuid.UUID       `json:"transfer_account_id"`
 	TransferTransactionID   *string          `json:"transfer_transaction_id"`
