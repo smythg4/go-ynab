@@ -16,8 +16,15 @@ const (
 	AccountTypeSavings        AccountType = "savings"
 	AccountTypeCash           AccountType = "cash"
 	AccountTypeCreditCard     AccountType = "creditCard"
+	AccountTypeLineOfCredit   AccountType = "lineOfCredit"
 	AccountTypeOtherAsset     AccountType = "otherAsset"
 	AccountTypeOtherLiability AccountType = "otherLiability"
+	AccountTypeMortgage       AccountType = "mortgage"
+	AccountTypeAutoLoan       AccountType = "autoLoan"
+	AccountTypeStudentLoan    AccountType = "studentLoan"
+	AccountTypePersonalLoan   AccountType = "personalLoan"
+	AccountTypeMedicalDebt    AccountType = "medicalDebt"
+	AccountTypeOtherDebt      AccountType = "otherDebt"
 )
 
 type accountData struct {

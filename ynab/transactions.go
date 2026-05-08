@@ -40,6 +40,7 @@ type Transaction struct {
 	CategoryName         *string          `json:"category_name"`
 	MatchedTransactionID *string          `json:"matched_transaction_id"`
 	Subtransactions      []Subtransaction `json:"subtransactions"`
+	Deleted              bool             `json:"deleted"`
 }
 
 // Subtransaction is a line item within a split transaction.
@@ -54,6 +55,7 @@ type Subtransaction struct {
 	CategoryName          *string    `json:"category_name"`
 	TransferAccountID     *uuid.UUID `json:"transfer_account_id"`
 	TransferTransactionID *string    `json:"transfer_transaction_id"`
+	Deleted               bool       `json:"deleted"`
 }
 
 // ClearedStatus represents the cleared state of a transaction.
@@ -136,8 +138,8 @@ const (
 	FrequencyEvery4Weeks     Frequency = "every4Weeks"
 	FrequencyMonthly         Frequency = "monthly"
 	FrequencyEveryOtherMonth Frequency = "everyOtherMonth"
-	FrequencyEvery3Months    Frequency = "everyThreeMonths"
-	FrequencyEvery4Months    Frequency = "everyFourMonths"
+	FrequencyEvery3Months    Frequency = "every3Months"
+	FrequencyEvery4Months    Frequency = "every4Months"
 	FrequencyTwiceAYear      Frequency = "twiceAYear"
 	FrequencyYearly          Frequency = "yearly"
 	FrequencyEveryOtherYear  Frequency = "everyOtherYear"
