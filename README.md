@@ -121,66 +121,66 @@ Available error types: `ErrBadRequest`, `ErrUnauthorized`, `ErrForbidden`, `ErrN
 | Method | Endpoint |
 |--------|----------|
 | `GetPlans` | `GET /plans` |
-| `GetPlan` | `GET /plans/{plan_id}` |
+| `GetPlan` † | `GET /plans/{plan_id}` |
 | `GetLastUsedPlan` | `GET /plans/last-used` |
 | `GetPlanSettings` | `GET /plans/{plan_id}/settings` |
 
 ### Accounts
 | Method | Endpoint |
 |--------|----------|
-| `GetAccounts` | `GET /plans/{plan_id}/accounts` |
+| `GetAccounts` † | `GET /plans/{plan_id}/accounts` |
 | `GetAccount` | `GET /plans/{plan_id}/accounts/{account_id}` |
 | `CreateAccount` | `POST /plans/{plan_id}/accounts` |
 
 ### Categories
 | Method | Endpoint |
 |--------|----------|
-| `GetCategories` | `GET /plans/{plan_id}/categories` |
+| `GetCategories` † | `GET /plans/{plan_id}/categories` |
 | `GetCategory` | `GET /plans/{plan_id}/categories/{category_id}` |
 | `GetCategoryForMonth` | `GET /plans/{plan_id}/months/{month}/categories/{category_id}` |
-| `CreateCategory` | `POST /plans/{plan_id}/categories` |
-| `CreateCategoryGroup` | `POST /plans/{plan_id}/category_groups` |
-| `UpdateCategory` | `PATCH /plans/{plan_id}/categories/{category_id}` |
-| `UpdateCategoryForMonth` | `PATCH /plans/{plan_id}/months/{month}/categories/{category_id}` |
-| `UpdateCategoryGroup` | `PATCH /plans/{plan_id}/category_groups/{category_group_id}` |
+| `CreateCategory` † | `POST /plans/{plan_id}/categories` |
+| `CreateCategoryGroup` † | `POST /plans/{plan_id}/category_groups` |
+| `UpdateCategory` † | `PATCH /plans/{plan_id}/categories/{category_id}` |
+| `UpdateCategoryForMonth` † | `PATCH /plans/{plan_id}/months/{month}/categories/{category_id}` |
+| `UpdateCategoryGroup` † | `PATCH /plans/{plan_id}/category_groups/{category_group_id}` |
 
 ### Months
 | Method | Endpoint |
 |--------|----------|
-| `GetMonths` | `GET /plans/{plan_id}/months` |
+| `GetMonths` † | `GET /plans/{plan_id}/months` |
 | `GetMonth` | `GET /plans/{plan_id}/months/{month}` |
 
 ### Payees
 | Method | Endpoint |
 |--------|----------|
-| `GetPayees` | `GET /plans/{plan_id}/payees` |
+| `GetPayees` † | `GET /plans/{plan_id}/payees` |
 | `GetPayee` | `GET /plans/{plan_id}/payees/{payee_id}` |
 | `GetPayeeLocations` | `GET /plans/{plan_id}/payee_locations` |
 | `GetPayeeLocation` | `GET /plans/{plan_id}/payee_locations/{payee_location_id}` |
 | `GetPayeeLocationsByPayee` | `GET /plans/{plan_id}/payees/{payee_id}/payee_locations` |
-| `CreatePayee` | `POST /plans/{plan_id}/payees` |
-| `UpdatePayee` | `PATCH /plans/{plan_id}/payees/{payee_id}` |
+| `CreatePayee` † | `POST /plans/{plan_id}/payees` |
+| `UpdatePayee` † | `PATCH /plans/{plan_id}/payees/{payee_id}` |
 
 ### Transactions
 | Method | Endpoint |
 |--------|----------|
-| `GetTransactions` | `GET /plans/{plan_id}/transactions` |
-| `GetTransaction` | `GET /plans/{plan_id}/transactions/{transaction_id}` |
-| `GetTransactionsByAccount` | `GET /plans/{plan_id}/accounts/{account_id}/transactions` |
-| `GetTransactionsByCategory` | `GET /plans/{plan_id}/categories/{category_id}/transactions` |
-| `GetTransactionsByPayee` | `GET /plans/{plan_id}/payees/{payee_id}/transactions` |
-| `GetTransactionsByMonth` | `GET /plans/{plan_id}/months/{month}/transactions` |
+| `GetTransactions` † | `GET /plans/{plan_id}/transactions` |
+| `GetTransaction` † | `GET /plans/{plan_id}/transactions/{transaction_id}` |
+| `GetTransactionsByAccount` † | `GET /plans/{plan_id}/accounts/{account_id}/transactions` |
+| `GetTransactionsByCategory` † | `GET /plans/{plan_id}/categories/{category_id}/transactions` |
+| `GetTransactionsByPayee` † | `GET /plans/{plan_id}/payees/{payee_id}/transactions` |
+| `GetTransactionsByMonth` † | `GET /plans/{plan_id}/months/{month}/transactions` |
 | `CreateTransaction` | `POST /plans/{plan_id}/transactions` |
 | `CreateTransactions` | `POST /plans/{plan_id}/transactions` |
 | `UpdateTransaction` | `PUT /plans/{plan_id}/transactions/{transaction_id}` |
 | `UpdateTransactions` | `PATCH /plans/{plan_id}/transactions` |
-| `DeleteTransaction` | `DELETE /plans/{plan_id}/transactions/{transaction_id}` |
+| `DeleteTransaction` † | `DELETE /plans/{plan_id}/transactions/{transaction_id}` |
 | `ImportTransactions` | `POST /plans/{plan_id}/transactions/import` |
 
 ### Scheduled Transactions
 | Method | Endpoint |
 |--------|----------|
-| `GetScheduledTransactions` | `GET /plans/{plan_id}/scheduled_transactions` |
+| `GetScheduledTransactions` † | `GET /plans/{plan_id}/scheduled_transactions` |
 | `GetScheduledTransaction` | `GET /plans/{plan_id}/scheduled_transactions/{scheduled_transaction_id}` |
 | `CreateScheduledTransaction` | `POST /plans/{plan_id}/scheduled_transactions` |
 | `UpdateScheduledTransaction` | `PUT /plans/{plan_id}/scheduled_transactions/{scheduled_transaction_id}` |
@@ -189,15 +189,17 @@ Available error types: `ErrBadRequest`, `ErrUnauthorized`, `ErrForbidden`, `ErrN
 ### Money Movements
 | Method | Endpoint |
 |--------|----------|
-| `GetMoneyMovements` | `GET /plans/{plan_id}/money_movements` |
-| `GetMoneyMovementsByMonth` | `GET /plans/{plan_id}/months/{month}/money_movements` |
-| `GetMoneyMovementGroups` | `GET /plans/{plan_id}/money_movement_groups` |
-| `GetMoneyMovementGroupsByMonth` | `GET /plans/{plan_id}/months/{month}/money_movement_groups` |
+| `GetMoneyMovements` † | `GET /plans/{plan_id}/money_movements` |
+| `GetMoneyMovementsByMonth` † | `GET /plans/{plan_id}/months/{month}/money_movements` |
+| `GetMoneyMovementGroups` † | `GET /plans/{plan_id}/money_movement_groups` |
+| `GetMoneyMovementGroupsByMonth` † | `GET /plans/{plan_id}/months/{month}/money_movement_groups` |
 
 ### User
 | Method | Endpoint |
 |--------|----------|
 | `GetUser` | `GET /user` |
+
+† Returns server knowledge as a second return value for use with delta requests.
 
 ## Test Coverage
 

@@ -10,7 +10,8 @@ import (
 
 type transactionData struct {
 	Data struct {
-		Transaction Transaction `json:"transaction"`
+		Transaction     Transaction `json:"transaction"`
+		ServerKnowledge int64       `json:"server_knowledge"`
 	} `json:"data"`
 }
 
@@ -171,15 +172,17 @@ func (c *Client) GetTransactions(ctx context.Context, planId uuid.UUID, params *
 }
 
 // GetTransaction returns a single transaction by ID.
-func (c *Client) GetTransaction(ctx context.Context, planId uuid.UUID, txId string) (*Transaction, error) {
+// The second return value is server knowledge for delta requests.
+func (c *Client) GetTransaction(ctx context.Context, planId uuid.UUID, txId string) (*Transaction, int64, error) {
 	var result transactionData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/transactions/%s", planId, txId), nil, &result); err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return &result.Data.Transaction, nil
+	return &result.Data.Transaction, result.Data.ServerKnowledge, nil
 }
 
 // GetTransactionsByAccount returns all transactions for a specific account.
+// The second return value is server knowledge for delta requests.
 func (c *Client) GetTransactionsByAccount(ctx context.Context, planId uuid.UUID, accountId uuid.UUID, params *TransactionListParams) ([]Transaction, int64, error) {
 	q := buildTransactionParams(params)
 	var result transactionsData
@@ -190,6 +193,7 @@ func (c *Client) GetTransactionsByAccount(ctx context.Context, planId uuid.UUID,
 }
 
 // GetTransactionsByCategory returns all transactions for a specific category.
+// The second return value is server knowledge for delta requests.
 func (c *Client) GetTransactionsByCategory(ctx context.Context, planId uuid.UUID, categoryId uuid.UUID, params *TransactionListParams) ([]Transaction, int64, error) {
 	q := buildTransactionParams(params)
 	var result transactionsData
@@ -200,6 +204,7 @@ func (c *Client) GetTransactionsByCategory(ctx context.Context, planId uuid.UUID
 }
 
 // GetTransactionsByPayee returns all transactions for a specific payee.
+// The second return value is server knowledge for delta requests.
 func (c *Client) GetTransactionsByPayee(ctx context.Context, planId uuid.UUID, payeeId uuid.UUID, params *TransactionListParams) ([]Transaction, int64, error) {
 	q := buildTransactionParams(params)
 	var result transactionsData
@@ -210,6 +215,7 @@ func (c *Client) GetTransactionsByPayee(ctx context.Context, planId uuid.UUID, p
 }
 
 // GetTransactionsByMonth returns all transactions for a specific budget month.
+// The second return value is server knowledge for delta requests.
 func (c *Client) GetTransactionsByMonth(ctx context.Context, planId uuid.UUID, month Date, params *TransactionListParams) ([]Transaction, int64, error) {
 	q := buildTransactionParams(params)
 	var result transactionsData
@@ -370,13 +376,14 @@ func (c *Client) CreateScheduledTransaction(ctx context.Context, planId uuid.UUI
 // DELETE Methods and infrastructure using transactions
 
 // DeleteTransaction deletes a transaction and returns the deleted transaction.
-func (c *Client) DeleteTransaction(ctx context.Context, planId uuid.UUID, transId string) (*Transaction, error) {
+// The second return value is server knowledge for delta requests.
+func (c *Client) DeleteTransaction(ctx context.Context, planId uuid.UUID, transId string) (*Transaction, int64, error) {
 	var result transactionData
 	err := c.delete(ctx, fmt.Sprintf("plans/%s/transactions/%s", planId, transId), &result)
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return &result.Data.Transaction, nil
+	return &result.Data.Transaction, result.Data.ServerKnowledge, nil
 }
 
 // DeleteScheduledTransaction deletes a scheduled transaction and returns the deleted record.

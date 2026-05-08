@@ -74,7 +74,7 @@ func TestGetTransactions_DeltaRequest(t *testing.T) {
 	for _, id := range created.TransactionIDs {
 		id := id
 		t.Cleanup(func() {
-			if _, err := client.DeleteTransaction(ctx, planID, id); err != nil {
+			if _, _, err := client.DeleteTransaction(ctx, planID, id); err != nil {
 				t.Logf("cleanup: DeleteTransaction %s: %v", id, err)
 			}
 		})
@@ -139,7 +139,7 @@ func TestTransaction_CreateGetDelete(t *testing.T) {
 	// 	}
 	// })
 
-	fetched, err := client.GetTransaction(ctx, planID, txID)
+	fetched, _, err := client.GetTransaction(ctx, planID, txID)
 	if err != nil {
 		t.Fatalf("GetTransaction: %v", err)
 	}
@@ -172,7 +172,7 @@ func TestTransaction_UpdateSingle(t *testing.T) {
 	}
 	txID := created.Transaction.ID
 	t.Cleanup(func() {
-		if _, err := client.DeleteTransaction(ctx, planID, txID); err != nil {
+		if _, _, err := client.DeleteTransaction(ctx, planID, txID); err != nil {
 			t.Logf("cleanup: DeleteTransaction %s: %v", txID, err)
 		}
 	})
@@ -220,7 +220,7 @@ func TestTransactions_CreateBatchAndUpdateBatch(t *testing.T) {
 	for _, id := range created.TransactionIDs {
 		id := id
 		t.Cleanup(func() {
-			if _, err := client.DeleteTransaction(ctx, planID, id); err != nil {
+			if _, _, err := client.DeleteTransaction(ctx, planID, id); err != nil {
 				t.Logf("cleanup: DeleteTransaction %s: %v", id, err)
 			}
 		})
@@ -273,7 +273,7 @@ func TestTransaction_SplitTransaction(t *testing.T) {
 	}
 	txID := created.Transaction.ID
 	t.Cleanup(func() {
-		if _, err := client.DeleteTransaction(ctx, planID, txID); err != nil {
+		if _, _, err := client.DeleteTransaction(ctx, planID, txID); err != nil {
 			t.Logf("cleanup: DeleteTransaction %s: %v", txID, err)
 		}
 	})
@@ -298,7 +298,7 @@ func TestCategory_CreateAndUpdate(t *testing.T) {
 	client, planID := setup(t)
 	ctx := context.Background()
 
-	group, err := client.CreateCategoryGroup(ctx, planID, ynab.SaveCategoryGroup{
+	group, _, err := client.CreateCategoryGroup(ctx, planID, ynab.SaveCategoryGroup{
 		Name: "integration-test-group",
 	})
 	if err != nil {
@@ -306,7 +306,7 @@ func TestCategory_CreateAndUpdate(t *testing.T) {
 	}
 	t.Logf("created category group %s", group.ID)
 
-	cat, err := client.CreateCategory(ctx, planID, ynab.SaveCategory{
+	cat, _, err := client.CreateCategory(ctx, planID, ynab.SaveCategory{
 		CategoryGroupID: group.ID,
 		Name:            "integration-test-category",
 	})
@@ -315,7 +315,7 @@ func TestCategory_CreateAndUpdate(t *testing.T) {
 	}
 	t.Logf("created category %s", cat.ID)
 
-	updatedCat, err := client.UpdateCategory(ctx, planID, cat.ID, ynab.SaveCategory{
+	updatedCat, _, err := client.UpdateCategory(ctx, planID, cat.ID, ynab.SaveCategory{
 		CategoryGroupID: group.ID,
 		Name:            "integration-test-category (updated)",
 	})
@@ -326,7 +326,7 @@ func TestCategory_CreateAndUpdate(t *testing.T) {
 		t.Errorf("got Name %q, want %q", updatedCat.Name, "integration-test-category (updated)")
 	}
 
-	updatedGroup, err := client.UpdateCategoryGroup(ctx, planID, group.ID, ynab.SaveCategoryGroup{
+	updatedGroup, _, err := client.UpdateCategoryGroup(ctx, planID, group.ID, ynab.SaveCategoryGroup{
 		Name: "integration-test-group (updated)",
 	})
 	if err != nil {
@@ -345,13 +345,13 @@ func TestPayee_CreateAndUpdate(t *testing.T) {
 	client, planID := setup(t)
 	ctx := context.Background()
 
-	payee, err := client.CreatePayee(ctx, planID, ynab.PostPayee{Name: "integration-test-payee"})
+	payee, _, err := client.CreatePayee(ctx, planID, ynab.PostPayee{Name: "integration-test-payee"})
 	if err != nil {
 		t.Fatalf("CreatePayee: %v", err)
 	}
 	t.Logf("created payee %s", payee.ID)
 
-	updated, err := client.UpdatePayee(ctx, planID, payee.ID, ynab.PostPayee{Name: "integration-test-payee (updated)"})
+	updated, _, err := client.UpdatePayee(ctx, planID, payee.ID, ynab.PostPayee{Name: "integration-test-payee (updated)"})
 	if err != nil {
 		t.Fatalf("UpdatePayee: %v", err)
 	}

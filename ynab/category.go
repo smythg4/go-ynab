@@ -10,7 +10,8 @@ import (
 
 type categoryData struct {
 	Data struct {
-		Category Category `json:"category"`
+		Category        Category `json:"category"`
+		ServerKnowledge int64    `json:"server_knowledge"`
 	} `json:"data"`
 }
 
@@ -125,13 +126,14 @@ type saveCategoryWrapper struct {
 }
 
 // CreateCategory creates a new category within a category group.
-func (c *Client) CreateCategory(ctx context.Context, planId uuid.UUID, sc SaveCategory) (*Category, error) {
+// The second return value is server knowledge for delta requests.
+func (c *Client) CreateCategory(ctx context.Context, planId uuid.UUID, sc SaveCategory) (*Category, int64, error) {
 	var result categoryData
 	err := c.post(ctx, fmt.Sprintf("plans/%s/categories", planId), saveCategoryWrapper{sc}, &result)
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return &result.Data.Category, nil
+	return &result.Data.Category, result.Data.ServerKnowledge, nil
 }
 
 // SaveCategoryGroup is the request body for creating or updating a category group.
@@ -144,25 +146,27 @@ type saveCategoryGroupWrapper struct {
 }
 
 // CreateCategoryGroup creates a new category group.
-func (c *Client) CreateCategoryGroup(ctx context.Context, planId uuid.UUID, scg SaveCategoryGroup) (*CategoryGroup, error) {
+// The second return value is server knowledge for delta requests.
+func (c *Client) CreateCategoryGroup(ctx context.Context, planId uuid.UUID, scg SaveCategoryGroup) (*CategoryGroup, int64, error) {
 	var result categoryGroupData
 	err := c.post(ctx, fmt.Sprintf("plans/%s/category_groups", planId), saveCategoryGroupWrapper{scg}, &result)
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return &result.Data.CategoryGroup, nil
+	return &result.Data.CategoryGroup, result.Data.ServerKnowledge, nil
 }
 
 // PATCH Methods and infrastructure using categories
 
 // UpdateCategory updates an existing category.
-func (c *Client) UpdateCategory(ctx context.Context, planId, categoryId uuid.UUID, sc SaveCategory) (*Category, error) {
+// The second return value is server knowledge for delta requests.
+func (c *Client) UpdateCategory(ctx context.Context, planId, categoryId uuid.UUID, sc SaveCategory) (*Category, int64, error) {
 	var result categoryData
 	err := c.patch(ctx, fmt.Sprintf("plans/%s/categories/%s", planId, categoryId), saveCategoryWrapper{sc}, &result)
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return &result.Data.Category, nil
+	return &result.Data.Category, result.Data.ServerKnowledge, nil
 }
 
 // SaveMonthCategory is the request body for updating a category's budget for a specific month.
@@ -175,21 +179,23 @@ type saveMonthCategoryWrapper struct {
 }
 
 // UpdateCategoryForMonth updates a category's budgeted amount for a specific month.
-func (c *Client) UpdateCategoryForMonth(ctx context.Context, planId uuid.UUID, month Date, categoryId uuid.UUID, smc SaveMonthCategory) (*Category, error) {
+// The second return value is server knowledge for delta requests.
+func (c *Client) UpdateCategoryForMonth(ctx context.Context, planId uuid.UUID, month Date, categoryId uuid.UUID, smc SaveMonthCategory) (*Category, int64, error) {
 	var result categoryData
 	err := c.patch(ctx, fmt.Sprintf("plans/%s/months/%s/categories/%s", planId, month, categoryId), saveMonthCategoryWrapper{smc}, &result)
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return &result.Data.Category, nil
+	return &result.Data.Category, result.Data.ServerKnowledge, nil
 }
 
 // UpdateCategoryGroup updates an existing category group.
-func (c *Client) UpdateCategoryGroup(ctx context.Context, planId, categoryGroupId uuid.UUID, scg SaveCategoryGroup) (*CategoryGroup, error) {
+// The second return value is server knowledge for delta requests.
+func (c *Client) UpdateCategoryGroup(ctx context.Context, planId, categoryGroupId uuid.UUID, scg SaveCategoryGroup) (*CategoryGroup, int64, error) {
 	var result categoryGroupData
 	err := c.patch(ctx, fmt.Sprintf("plans/%s/category_groups/%s", planId, categoryGroupId), saveCategoryGroupWrapper{scg}, &result)
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return &result.Data.CategoryGroup, nil
+	return &result.Data.CategoryGroup, result.Data.ServerKnowledge, nil
 }

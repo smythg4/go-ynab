@@ -109,7 +109,7 @@ func TestGetPayeeLocationsByPayee(t *testing.T) {
 func TestCreatePayee(t *testing.T) {
 	client, transport := newTestClient(payeeSingleFixture, 201)
 
-	payee, err := client.CreatePayee(context.Background(), uuid.New(), PostPayee{Name: "Testing Tom"})
+	payee, _, err := client.CreatePayee(context.Background(), uuid.New(), PostPayee{Name: "Testing Tom"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -135,7 +135,7 @@ func TestCreatePayee(t *testing.T) {
 func TestUpdatePayee(t *testing.T) {
 	client, transport := newTestClient(payeeSingleFixture, 200)
 
-	payee, err := client.UpdatePayee(context.Background(), uuid.New(), uuid.New(), PostPayee{Name: "Testing Tom"})
+	payee, _, err := client.UpdatePayee(context.Background(), uuid.New(), uuid.New(), PostPayee{Name: "Testing Tom"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

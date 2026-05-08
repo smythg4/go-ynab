@@ -71,7 +71,7 @@ func main() {
 		log.Fatalf("failed to get category for month: %v", err)
 	}
 
-	updated, err := client.UpdateCategoryForMonth(ctx, planId, month, cat.ID, ynab.SaveMonthCategory{
+	updated, _, err := client.UpdateCategoryForMonth(ctx, planId, month, cat.ID, ynab.SaveMonthCategory{
 		Budgeted: current.Budgeted + 10000,
 	})
 	if err != nil {

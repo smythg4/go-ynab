@@ -94,7 +94,7 @@ func TestGetTransactionsFilteredType(t *testing.T) {
 func TestGetTransaction(t *testing.T) {
 	client, _ := newTestClient(txSingleFixture, 200)
 
-	tx, err := client.GetTransaction(context.Background(), uuid.New(), "abc-123")
+	tx, _, err := client.GetTransaction(context.Background(), uuid.New(), "abc-123")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -208,7 +208,7 @@ func TestGetScheduledTransaction(t *testing.T) {
 func TestDeleteTransaction(t *testing.T) {
 	client, transport := newTestClient(txSingleFixture, 200)
 
-	tx, err := client.DeleteTransaction(context.Background(), uuid.New(), "abc-123")
+	tx, _, err := client.DeleteTransaction(context.Background(), uuid.New(), "abc-123")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

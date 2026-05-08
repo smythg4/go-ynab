@@ -67,7 +67,7 @@ func main() {
 	fmt.Printf("   %-10s $%.2f\n", "Amount:", ynab.MilliunitsToAmount(createResp.Transaction.Amount))
 	fmt.Printf("   %-10s %s\n", "Memo:", *createResp.Transaction.Memo)
 
-	deleteResp, err := client.DeleteTransaction(ctx, planId, createResp.Transaction.ID)
+	deleteResp, _, err := client.DeleteTransaction(ctx, planId, createResp.Transaction.ID)
 	if err != nil {
 		log.Fatalf("failed to delete transaction: %v", err)
 	}

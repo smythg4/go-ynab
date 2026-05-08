@@ -57,6 +57,7 @@ func (c *Client) GetMoneyMovements(ctx context.Context, planId uuid.UUID, params
 }
 
 // GetMoneyMovementsByMonth returns money movements for a specific budget month.
+// The second return value is server knowledge for delta requests.
 func (c *Client) GetMoneyMovementsByMonth(ctx context.Context, planId uuid.UUID, month Date) ([]MoneyMovement, int64, error) {
 	var result moneyMovementsData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/months/%s/money_movements", planId, month), nil, &result); err != nil {
@@ -76,6 +77,7 @@ func (c *Client) GetMoneyMovementGroups(ctx context.Context, planId uuid.UUID, p
 }
 
 // GetMoneyMovementGroupsByMonth returns money movement groups for a specific budget month.
+// The second return value is server knowledge for delta requests.
 func (c *Client) GetMoneyMovementGroupsByMonth(ctx context.Context, planId uuid.UUID, month Date) ([]MoneyMovementGroup, int64, error) {
 	var result moneyMovementGroupData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/months/%s/money_movement_groups", planId, month), nil, &result); err != nil {

@@ -9,7 +9,8 @@ import (
 
 type payeeData struct {
 	Data struct {
-		Payee Payee `json:"payee"`
+		Payee           Payee `json:"payee"`
+		ServerKnowledge int64 `json:"server_knowledge"`
 	} `json:"data"`
 }
 
@@ -108,23 +109,25 @@ type postPayeeWrapper struct {
 }
 
 // CreatePayee creates a new payee.
-func (c *Client) CreatePayee(ctx context.Context, planId uuid.UUID, pp PostPayee) (*Payee, error) {
+// The second return value is server knowledge for delta requests.
+func (c *Client) CreatePayee(ctx context.Context, planId uuid.UUID, pp PostPayee) (*Payee, int64, error) {
 	var result payeeData
 	err := c.post(ctx, fmt.Sprintf("plans/%s/payees", planId), postPayeeWrapper{pp}, &result)
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return &result.Data.Payee, nil
+	return &result.Data.Payee, result.Data.ServerKnowledge, nil
 }
 
 // PATCH Methods and infrastructure using payees
 
 // UpdatePayee updates an existing payee.
-func (c *Client) UpdatePayee(ctx context.Context, planId, payeeId uuid.UUID, pp PostPayee) (*Payee, error) {
+// The second return value is server knowledge for delta requests.
+func (c *Client) UpdatePayee(ctx context.Context, planId, payeeId uuid.UUID, pp PostPayee) (*Payee, int64, error) {
 	var result payeeData
 	err := c.patch(ctx, fmt.Sprintf("plans/%s/payees/%s", planId, payeeId), postPayeeWrapper{pp}, &result)
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return &result.Data.Payee, nil
+	return &result.Data.Payee, result.Data.ServerKnowledge, nil
 }

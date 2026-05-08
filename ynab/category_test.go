@@ -84,7 +84,7 @@ func TestCreateCategory(t *testing.T) {
 	client, transport := newTestClient(categorySingleFixture, 201)
 
 	groupID := uuid.MustParse("223e4567-e89b-12d3-a456-426614174000")
-	category, err := client.CreateCategory(context.Background(), uuid.New(), SaveCategory{
+	category, _, err := client.CreateCategory(context.Background(), uuid.New(), SaveCategory{
 		CategoryGroupID: groupID,
 		Name:            "Groceries",
 	})
@@ -114,7 +114,7 @@ func TestCreateCategoryGroup(t *testing.T) {
 	fixture := `{"data":{"category_group":` + categoryGroupFixture + `,"server_knowledge":0}}`
 	client, transport := newTestClient(fixture, 201)
 
-	group, err := client.CreateCategoryGroup(context.Background(), uuid.New(), SaveCategoryGroup{
+	group, _, err := client.CreateCategoryGroup(context.Background(), uuid.New(), SaveCategoryGroup{
 		Name: "Everyday Expenses",
 	})
 	if err != nil {
@@ -143,7 +143,7 @@ func TestUpdateCategory(t *testing.T) {
 	client, transport := newTestClient(categorySingleFixture, 200)
 
 	groupID := uuid.MustParse("223e4567-e89b-12d3-a456-426614174000")
-	category, err := client.UpdateCategory(context.Background(), uuid.New(), uuid.New(), SaveCategory{
+	category, _, err := client.UpdateCategory(context.Background(), uuid.New(), uuid.New(), SaveCategory{
 		CategoryGroupID: groupID,
 		Name:            "Groceries",
 	})
@@ -172,7 +172,7 @@ func TestUpdateCategoryForMonth(t *testing.T) {
 	client, transport := newTestClient(categorySingleFixture, 200)
 
 	month := Date{time.Date(2024, 3, 1, 0, 0, 0, 0, time.UTC)}
-	category, err := client.UpdateCategoryForMonth(context.Background(), uuid.New(), month, uuid.New(), SaveMonthCategory{
+	category, _, err := client.UpdateCategoryForMonth(context.Background(), uuid.New(), month, uuid.New(), SaveMonthCategory{
 		Budgeted: 75000,
 	})
 	if err != nil {
@@ -201,7 +201,7 @@ func TestUpdateCategoryGroup(t *testing.T) {
 	fixture := `{"data":{"category_group":` + categoryGroupFixture + `,"server_knowledge":0}}`
 	client, transport := newTestClient(fixture, 200)
 
-	group, err := client.UpdateCategoryGroup(context.Background(), uuid.New(), uuid.New(), SaveCategoryGroup{
+	group, _, err := client.UpdateCategoryGroup(context.Background(), uuid.New(), uuid.New(), SaveCategoryGroup{
 		Name: "Everyday Expenses",
 	})
 	if err != nil {
