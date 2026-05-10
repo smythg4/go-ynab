@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-const txFixture = `{"id":"abc-123","date":"2024-03-15","amount":-15000,"memo":null,"cleared":"cleared","approved":true,"flag_color":null,"flag_name":null,"account_id":"123e4567-e89b-12d3-a456-426614174000","payee_id":null,"account_name":"Checking","payee_name":null,"category_id":null,"category_name":null,"matched_transaction_id":null,"subtransactions":[]}`
+const txFixture = `{"id":"123e4567-e89b-12d3-a456-426614174001","date":"2024-03-15","amount":-15000,"memo":null,"cleared":"cleared","approved":true,"flag_color":null,"flag_name":null,"account_id":"123e4567-e89b-12d3-a456-426614174000","payee_id":null,"account_name":"Checking","payee_name":null,"category_id":null,"category_name":null,"matched_transaction_id":null,"subtransactions":[]}`
 
 const txListFixture = `{"data":{"transactions":[` + txFixture + `],"server_knowledge":5}}`
 const txSingleFixture = `{"data":{"transaction":` + txFixture + `}}`
@@ -33,8 +33,9 @@ func TestGetTransactions(t *testing.T) {
 		t.Fatalf("expected 1 transaction, got %d", len(txs))
 	}
 
-	if txs[0].ID != "abc-123" {
-		t.Errorf("got ID %v, want abc-123", txs[0].ID)
+	idWant := uuid.MustParse("123e4567-e89b-12d3-a456-426614174001")
+	if txs[0].ID != idWant {
+		t.Errorf("got ID %v, want %v", txs[0].ID, idWant)
 	}
 
 	if txs[0].Amount != -15000 {
@@ -94,13 +95,14 @@ func TestGetTransactionsFilteredType(t *testing.T) {
 func TestGetTransaction(t *testing.T) {
 	client, _ := newTestClient(txSingleFixture, 200)
 
-	tx, _, err := client.GetTransaction(context.Background(), uuid.New(), "abc-123")
+	txID := uuid.MustParse("123e4567-e89b-12d3-a456-426614174001")
+	tx, _, err := client.GetTransaction(context.Background(), uuid.New(), txID)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if tx.ID != "abc-123" {
-		t.Errorf("got ID %v, want abc-123", tx.ID)
+	if tx.ID != txID {
+		t.Errorf("got ID %v, want %v", tx.ID, txID)
 	}
 
 	if tx.Cleared != ClearedStatusCleared {
@@ -208,7 +210,8 @@ func TestGetScheduledTransaction(t *testing.T) {
 func TestDeleteTransaction(t *testing.T) {
 	client, transport := newTestClient(txSingleFixture, 200)
 
-	tx, _, err := client.DeleteTransaction(context.Background(), uuid.New(), "abc-123")
+	txID := uuid.MustParse("123e4567-e89b-12d3-a456-426614174001")
+	tx, _, err := client.DeleteTransaction(context.Background(), uuid.New(), txID)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -217,15 +220,15 @@ func TestDeleteTransaction(t *testing.T) {
 		t.Errorf("got method %v, want DELETE", transport.lastReq.Method)
 	}
 
-	if tx.ID != "abc-123" {
-		t.Errorf("got ID %v, want abc-123", tx.ID)
+	if tx.ID != txID {
+		t.Errorf("got ID %v, want %v", tx.ID, txID)
 	}
 }
 
 func TestDeleteScheduledTransaction(t *testing.T) {
 	client, transport := newTestClient(scheduledTxSingleFixture, 200)
 
-	tx, err := client.DeleteScheduledTransaction(context.Background(), uuid.New(), uuid.New())
+	tx, _, err := client.DeleteScheduledTransaction(context.Background(), uuid.New(), uuid.New())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -241,12 +244,13 @@ func TestDeleteScheduledTransaction(t *testing.T) {
 }
 
 func TestUpdateTransaction(t *testing.T) {
-	fixture := `{"data":{"transaction_ids":["abc-123"],"transaction":` + txFixture +
+	txID := uuid.MustParse("123e4567-e89b-12d3-a456-426614174001")
+	fixture := `{"data":{"transaction_ids":["123e4567-e89b-12d3-a456-426614174001"],"transaction":` + txFixture +
 		`,"duplicate_import_ids":[],"server_knowledge":10}}`
 	client, transport := newTestClient(fixture, 200)
 
-	resp, err := client.UpdateTransaction(context.Background(), uuid.New(), "abc-123", UpdateTransaction{
-		ID:        "abc-123",
+	resp, err := client.UpdateTransaction(context.Background(), uuid.New(), txID, UpdateTransaction{
+		ID:        txID,
 		AccountID: uuid.New(),
 		Date:      Date{time.Now()},
 		Amount:    -15000,
@@ -260,8 +264,8 @@ func TestUpdateTransaction(t *testing.T) {
 		t.Errorf("got method %v, want PUT", transport.lastReq.Method)
 	}
 
-	if resp.Transaction.ID != "abc-123" {
-		t.Errorf("got transaction ID %v, want abc-123", resp.Transaction.ID)
+	if resp.Transaction.ID != txID {
+		t.Errorf("got transaction ID %v, want %v", resp.Transaction.ID, txID)
 	}
 
 	if resp.ServerKnowledge != 10 {
@@ -272,8 +276,8 @@ func TestUpdateTransaction(t *testing.T) {
 	if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
 		t.Fatalf("could not unmarshal request body: %v", err)
 	}
-	if payload.Transactions.ID != "abc-123" {
-		t.Errorf("got payload ID %v, want abc-123", payload.Transactions.ID)
+	if payload.Transactions.ID != txID {
+		t.Errorf("got payload ID %v, want %v", payload.Transactions.ID, txID)
 	}
 }
 
@@ -310,7 +314,8 @@ func TestUpdateScheduledTransaction(t *testing.T) {
 }
 
 func TestCreateTransaction(t *testing.T) {
-	fixture := `{"data":{"transaction_ids":["abc-123"],"transaction":` + txFixture + `,"duplicate_import_ids":[],"server_knowledge":6}}`
+	txID := uuid.MustParse("123e4567-e89b-12d3-a456-426614174001")
+	fixture := `{"data":{"transaction_ids":["123e4567-e89b-12d3-a456-426614174001"],"transaction":` + txFixture + `,"duplicate_import_ids":[],"server_knowledge":6}}`
 	client, transport := newTestClient(fixture, 201)
 
 	resp, err := client.CreateTransaction(context.Background(), uuid.New(), SaveTransaction{
@@ -327,8 +332,8 @@ func TestCreateTransaction(t *testing.T) {
 		t.Errorf("got method %v, want POST", transport.lastReq.Method)
 	}
 
-	if resp.Transaction.ID != "abc-123" {
-		t.Errorf("got transaction ID %v, want abc-123", resp.Transaction.ID)
+	if resp.Transaction.ID != txID {
+		t.Errorf("got transaction ID %v, want %v", resp.Transaction.ID, txID)
 	}
 
 	if resp.ServerKnowledge != 6 {
@@ -345,7 +350,7 @@ func TestCreateTransaction(t *testing.T) {
 }
 
 func TestCreateTransactions(t *testing.T) {
-	fixture := `{"data":{"transaction_ids":["abc-123","abc-456"],"transactions":[` + txFixture + `,` + txFixture + `],"duplicate_import_ids":[],"server_knowledge":7}}`
+	fixture := `{"data":{"transaction_ids":["123e4567-e89b-12d3-a456-426614174001","123e4567-e89b-12d3-a456-426614174002"],"transactions":[` + txFixture + `,` + txFixture + `],"duplicate_import_ids":[],"server_knowledge":7}}`
 	client, transport := newTestClient(fixture, 201)
 
 	resp, err := client.CreateTransactions(context.Background(), uuid.New(), []SaveTransaction{
@@ -378,7 +383,7 @@ func TestCreateTransactions(t *testing.T) {
 }
 
 func TestImportTransactions(t *testing.T) {
-	fixture := `{"data":{"transaction_ids":["abc-123"],"server_knowledge":8}}`
+	fixture := `{"data":{"transaction_ids":["123e4567-e89b-12d3-a456-426614174001"],"server_knowledge":8}}`
 	client, transport := newTestClient(fixture, 200)
 
 	resp, err := client.ImportTransactions(context.Background(), uuid.New())
@@ -431,11 +436,15 @@ func TestCreateScheduledTransaction(t *testing.T) {
 }
 
 func TestUpdateTransactions(t *testing.T) {
-	fixture := `{"data":{"transaction_ids":["abc-123"],"transactions":[` + txFixture + `],"duplicate_import_ids":[],"server_knowledge":9}}`
+	fixture := `{"data":{"transaction_ids":["123e4567-e89b-12d3-a456-426614174001"],"transactions":[` + txFixture + `],"duplicate_import_ids":[],"server_knowledge":9}}`
 	client, transport := newTestClient(fixture, 200)
 
-	resp, err := client.UpdateTransactions(context.Background(), uuid.New(), []UpdateTransaction{
-		{ID: "abc-123", AccountID: uuid.New(), Date: Date{time.Now()}, Amount: -15000, Cleared: ClearedStatusCleared},
+	txID := uuid.MustParse("123e4567-e89b-12d3-a456-426614174001")
+	acctID := uuid.New()
+	now := Date{time.Now()}
+	amount := int64(-15000)
+	resp, err := client.UpdateTransactions(context.Background(), uuid.New(), []PatchTransaction{
+		{ID: &txID, AccountID: &acctID, Date: &now, Amount: &amount, Cleared: ClearedStatusCleared},
 	})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -453,7 +462,7 @@ func TestUpdateTransactions(t *testing.T) {
 		t.Errorf("got server_knowledge %v, want 9", resp.ServerKnowledge)
 	}
 
-	var payload updateTransactionsWrapper
+	var payload patchTransactionsWrapper
 	if err := json.Unmarshal(transport.lastBody, &payload); err != nil {
 		t.Fatalf("could not unmarshal request body: %v", err)
 	}

@@ -81,7 +81,7 @@ func TestGetTransactions_DeltaRequest(t *testing.T) {
 	}
 	t.Logf("created transactions %v", created.TransactionIDs)
 
-	createdIDs := map[string]bool{
+	createdIDs := map[uuid.UUID]bool{
 		created.TransactionIDs[0]: true,
 		created.TransactionIDs[1]: true,
 	}
@@ -133,11 +133,11 @@ func TestTransaction_CreateGetDelete(t *testing.T) {
 	}
 	txID := created.Transaction.ID
 	t.Logf("created transaction %s", txID)
-	// t.Cleanup(func() {
-	// 	if _, err := client.DeleteTransaction(ctx, planID, txID); err != nil {
-	// 		t.Logf("cleanup: DeleteTransaction %s: %v", txID, err)
-	// 	}
-	// })
+	t.Cleanup(func() {
+		if _, _, err := client.DeleteTransaction(ctx, planID, txID); err != nil {
+			t.Logf("cleanup: DeleteTransaction %s: %v", txID, err)
+		}
+	})
 
 	fetched, _, err := client.GetTransaction(ctx, planID, txID)
 	if err != nil {
@@ -226,17 +226,12 @@ func TestTransactions_CreateBatchAndUpdateBatch(t *testing.T) {
 		})
 	}
 
-	updates := make([]ynab.UpdateTransaction, len(created.Transactions))
+	updates := make([]ynab.PatchTransaction, len(created.Transactions))
 	for i, tx := range created.Transactions {
 		updatedMemo := fmt.Sprintf("%s (updated)", *tx.Memo)
-		updates[i] = ynab.UpdateTransaction{
-			ID:        tx.ID,
-			AccountID: tx.AccountID,
-			Date:      tx.Date,
-			Amount:    tx.Amount,
-			Memo:      &updatedMemo,
-			Cleared:   tx.Cleared,
-			Approved:  &tx.Approved,
+		updates[i] = ynab.PatchTransaction{
+			ID:   &tx.ID,
+			Memo: &updatedMemo,
 		}
 	}
 
@@ -381,7 +376,7 @@ func TestScheduledTransaction_CRUD(t *testing.T) {
 	stxID := created.ID
 	t.Logf("created scheduled transaction %s", stxID)
 	t.Cleanup(func() {
-		if _, err := client.DeleteScheduledTransaction(ctx, planID, stxID); err != nil {
+		if _, _, err := client.DeleteScheduledTransaction(ctx, planID, stxID); err != nil {
 			t.Logf("cleanup: DeleteScheduledTransaction %s: %v", stxID, err)
 		}
 	})

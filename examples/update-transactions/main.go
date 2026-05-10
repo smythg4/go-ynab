@@ -1,11 +1,8 @@
 // update-transactions fetches the most recent 2 transactions from the first plan
-// for the authenticated user, appends " (updated)" to their memos, and replaces
-// them via a PATCH request, then prints the before and after state.
+// for the authenticated user, appends " (updated)" to their memos via a PATCH
+// request, then prints the before and after state.
 //
-// Only provided fields are updated, but supplying all fields is recommended to
-// avoid unintentional data loss.
-//
-// Fetch the existing transactions first to avoid losing data.
+// Only the memo field is sent; all other fields are left unchanged by the API.
 //
 // Note: running this example multiple times will append " (updated)" repeatedly
 // to the memo of the same transaction.
@@ -21,6 +18,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/google/uuid"
 	"github.com/smythg4/go-ynab/ynab"
 )
 
@@ -53,26 +51,19 @@ func main() {
 	}
 
 	originals := txs[len(txs)-2:]
-	updates := make([]ynab.UpdateTransaction, 0, 2)
-	oldmemos := make(map[string]string, 2)
+	updates := make([]ynab.PatchTransaction, 0, 2)
+	oldmemos := make(map[uuid.UUID]string, 2)
 	for _, original := range originals {
+		id := original.ID
 		oldMemo := ""
 		if original.Memo != nil {
 			oldMemo = *original.Memo
 		}
 		newMemo := oldMemo + " (updated)"
 
-		updates = append(updates, ynab.UpdateTransaction{
-			ID:         original.ID,
-			AccountID:  original.AccountID,
-			Date:       original.Date,
-			Amount:     original.Amount,
-			PayeeID:    original.PayeeID,
-			CategoryID: original.CategoryID,
-			Cleared:    original.Cleared,
-			Approved:   &original.Approved,
-			FlagColor:  original.FlagColor,
-			Memo:       &newMemo,
+		updates = append(updates, ynab.PatchTransaction{
+			ID:   &id,
+			Memo: &newMemo,
 		})
 		oldmemos[original.ID] = oldMemo
 	}

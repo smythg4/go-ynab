@@ -221,4 +221,5 @@ YNAB_TOKEN=... YNAB_TEST_PLAN_ID=... go test -tags integration -v ./integration/
 
 ---
 
-Not affiliated with YNAB. [YNAB API Terms of Service](https://api.ynab.com/#terms).
+I am not affiliated, associated, or in any way officially connected with YNAB or any of its subsidiaries or affiliates. The official YNAB website can be found at https://www.ynab.com.
+The names YNAB and You Need A Budget, as well as related names, tradenames, marks, trademarks, emblems, and images are registered trademarks of YNAB. [YNAB API Terms of Service](https://api.ynab.com/#terms).

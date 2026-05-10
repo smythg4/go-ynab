@@ -24,7 +24,7 @@ type transactionsData struct {
 
 // Transaction represents a single YNAB transaction. Amounts are in milliunits (divide by 1000 for display).
 type Transaction struct {
-	ID                      string           `json:"id"`
+	ID                      uuid.UUID        `json:"id"`
 	Date                    Date             `json:"date"`
 	Amount                  int64            `json:"amount"`
 	Memo                    *string          `json:"memo"`
@@ -38,9 +38,9 @@ type Transaction struct {
 	PayeeName               *string          `json:"payee_name"`
 	CategoryID              *uuid.UUID       `json:"category_id"`
 	CategoryName            *string          `json:"category_name"`
-	MatchedTransactionID    *string          `json:"matched_transaction_id"`
+	MatchedTransactionID    *uuid.UUID       `json:"matched_transaction_id"`
 	TransferAccountID       *uuid.UUID       `json:"transfer_account_id"`
-	TransferTransactionID   *string          `json:"transfer_transaction_id"`
+	TransferTransactionID   *uuid.UUID       `json:"transfer_transaction_id"`
 	ImportID                *string          `json:"import_id"`
 	ImportPayeeName         *string          `json:"import_payee_name"`
 	ImportPayeeNameOriginal *string          `json:"import_payee_name_original"`
@@ -50,8 +50,8 @@ type Transaction struct {
 
 // Subtransaction is a line item within a split transaction.
 type Subtransaction struct {
-	ID                    string     `json:"id"`
-	TransactionID         string     `json:"transaction_id"`
+	ID                    uuid.UUID  `json:"id"`
+	TransactionID         uuid.UUID  `json:"transaction_id"`
 	Amount                int64      `json:"amount"`
 	Memo                  *string    `json:"memo"`
 	PayeeID               *uuid.UUID `json:"payee_id"`
@@ -59,7 +59,7 @@ type Subtransaction struct {
 	CategoryID            *uuid.UUID `json:"category_id"`
 	CategoryName          *string    `json:"category_name"`
 	TransferAccountID     *uuid.UUID `json:"transfer_account_id"`
-	TransferTransactionID *string    `json:"transfer_transaction_id"`
+	TransferTransactionID *uuid.UUID `json:"transfer_transaction_id"`
 	Deleted               bool       `json:"deleted"`
 }
 
@@ -76,6 +76,7 @@ const (
 type FlagColor string
 
 const (
+	FlagColorNone   FlagColor = ""
 	FlagColorRed    FlagColor = "red"
 	FlagColorOrange FlagColor = "orange"
 	FlagColorYellow FlagColor = "yellow"
@@ -87,6 +88,7 @@ const (
 type scheduledTransactionData struct {
 	Data struct {
 		ScheduledTransaction ScheduledTransaction `json:"scheduled_transaction"`
+		ServerKnowledge      int64                `json:"server_knowledge"`
 	} `json:"data"`
 }
 
@@ -180,7 +182,7 @@ func (c *Client) GetTransactions(ctx context.Context, planId uuid.UUID, params *
 
 // GetTransaction returns a single transaction by ID.
 // The second return value is server knowledge for delta requests.
-func (c *Client) GetTransaction(ctx context.Context, planId uuid.UUID, txId string) (*Transaction, int64, error) {
+func (c *Client) GetTransaction(ctx context.Context, planId uuid.UUID, txId uuid.UUID) (*Transaction, int64, error) {
 	var result transactionData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/transactions/%s", planId, txId), nil, &result); err != nil {
 		return nil, -1, err
@@ -293,7 +295,7 @@ type SaveSubtransaction struct {
 // CreateTransactionResponse is returned by CreateTransaction.
 // DuplicateImportIDs contains any ImportIDs that matched existing transactions and were skipped.
 type CreateTransactionResponse struct {
-	TransactionIDs     []string    `json:"transaction_ids"`
+	TransactionIDs     []uuid.UUID `json:"transaction_ids"`
 	Transaction        Transaction `json:"transaction"`
 	DuplicateImportIDs []string    `json:"duplicate_import_ids"`
 	ServerKnowledge    int64       `json:"server_knowledge"`
@@ -305,7 +307,7 @@ type createTransactionsResponseData struct {
 
 // CreateTransactionsResponse is returned by CreateTransactions and UpdateTransactions.
 type CreateTransactionsResponse struct {
-	TransactionIDs     []string      `json:"transaction_ids"`
+	TransactionIDs     []uuid.UUID   `json:"transaction_ids"`
 	Transactions       []Transaction `json:"transactions"`
 	DuplicateImportIDs []string      `json:"duplicate_import_ids"`
 	ServerKnowledge    int64         `json:"server_knowledge"`
@@ -337,8 +339,8 @@ type importTransactionsResponseData struct {
 
 // ImportTransactionsResponse is returned by ImportTransactions.
 type ImportTransactionsResponse struct {
-	TransactionIDs  []string `json:"transaction_ids"`
-	ServerKnowledge int64    `json:"server_knowledge"`
+	TransactionIDs  []uuid.UUID `json:"transaction_ids"`
+	ServerKnowledge int64       `json:"server_knowledge"`
 }
 
 // ImportTransactions triggers an import of transactions from linked accounts. Returns the IDs of imported transactions.
@@ -384,7 +386,7 @@ func (c *Client) CreateScheduledTransaction(ctx context.Context, planId uuid.UUI
 
 // DeleteTransaction deletes a transaction and returns the deleted transaction.
 // The second return value is server knowledge for delta requests.
-func (c *Client) DeleteTransaction(ctx context.Context, planId uuid.UUID, transId string) (*Transaction, int64, error) {
+func (c *Client) DeleteTransaction(ctx context.Context, planId uuid.UUID, transId uuid.UUID) (*Transaction, int64, error) {
 	var result transactionData
 	err := c.delete(ctx, fmt.Sprintf("plans/%s/transactions/%s", planId, transId), &result)
 	if err != nil {
@@ -393,21 +395,21 @@ func (c *Client) DeleteTransaction(ctx context.Context, planId uuid.UUID, transI
 	return &result.Data.Transaction, result.Data.ServerKnowledge, nil
 }
 
-// DeleteScheduledTransaction deletes a scheduled transaction and returns the deleted record.
-func (c *Client) DeleteScheduledTransaction(ctx context.Context, planId uuid.UUID, transId uuid.UUID) (*ScheduledTransaction, error) {
+// DeleteScheduledTransaction deletes a scheduled transaction and returns the deleted record and server knowledge.
+func (c *Client) DeleteScheduledTransaction(ctx context.Context, planId uuid.UUID, transId uuid.UUID) (*ScheduledTransaction, int64, error) {
 	var result scheduledTransactionData
 	err := c.delete(ctx, fmt.Sprintf("plans/%s/scheduled_transactions/%s", planId, transId), &result)
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
-	return &result.Data.ScheduledTransaction, nil
+	return &result.Data.ScheduledTransaction, result.Data.ServerKnowledge, nil
 }
 
 // PATCH Methods and infrastructure using transactions
 
-// UpdateTransaction is the request body for updating a transaction. ID identifies which transaction to update.
+// UpdateTransaction is the request body for replacing a transaction (PUT). ID, AccountID, Date, and Amount are required.
 type UpdateTransaction struct {
-	ID         string        `json:"id"`
+	ID         uuid.UUID     `json:"id"`
 	AccountID  uuid.UUID     `json:"account_id"`
 	Date       Date          `json:"date"`
 	Amount     int64         `json:"amount"`
@@ -421,17 +423,34 @@ type UpdateTransaction struct {
 	ImportID   *string       `json:"import_id,omitempty"`
 }
 
-type updateTransactionsWrapper struct {
-	Transactions []UpdateTransaction `json:"transactions"`
+// PatchTransaction is the request body for partially updating a transaction (PATCH).
+// Identify the target by setting ID (a *uuid.UUID pointer) or ImportID; only non-nil fields are applied.
+type PatchTransaction struct {
+	ID         *uuid.UUID    `json:"id,omitempty"`
+	ImportID   *string       `json:"import_id,omitempty"`
+	AccountID  *uuid.UUID    `json:"account_id,omitempty"`
+	Date       *Date         `json:"date,omitempty"`
+	Amount     *int64        `json:"amount,omitempty"`
+	PayeeID    *uuid.UUID    `json:"payee_id,omitempty"`
+	PayeeName  *string       `json:"payee_name,omitempty"`
+	CategoryID *uuid.UUID    `json:"category_id,omitempty"`
+	Memo       *string       `json:"memo,omitempty"`
+	Cleared    ClearedStatus `json:"cleared,omitempty"`
+	Approved   *bool         `json:"approved,omitempty"`
+	FlagColor  *FlagColor    `json:"flag_color,omitempty"`
+}
+
+type patchTransactionsWrapper struct {
+	Transactions []PatchTransaction `json:"transactions"`
 }
 type updateTransactionWrapper struct {
 	Transactions UpdateTransaction `json:"transaction"`
 }
 
 // UpdateTransactions applies partial updates to multiple transactions (PATCH).
-func (c *Client) UpdateTransactions(ctx context.Context, planId uuid.UUID, t []UpdateTransaction) (*CreateTransactionsResponse, error) {
+func (c *Client) UpdateTransactions(ctx context.Context, planId uuid.UUID, t []PatchTransaction) (*CreateTransactionsResponse, error) {
 	var result createTransactionsResponseData
-	err := c.patch(ctx, fmt.Sprintf("plans/%s/transactions", planId), updateTransactionsWrapper{t},
+	err := c.patch(ctx, fmt.Sprintf("plans/%s/transactions", planId), patchTransactionsWrapper{t},
 		&result)
 	if err != nil {
 		return nil, err
@@ -442,7 +461,7 @@ func (c *Client) UpdateTransactions(ctx context.Context, planId uuid.UUID, t []U
 // PUT Methods and infrastructure using transactions
 
 // UpdateTransaction replaces a transaction (PUT). Use UpdateTransactions for partial batch updates.
-func (c *Client) UpdateTransaction(ctx context.Context, planId uuid.UUID, txId string, t UpdateTransaction) (*CreateTransactionResponse, error) {
+func (c *Client) UpdateTransaction(ctx context.Context, planId uuid.UUID, txId uuid.UUID, t UpdateTransaction) (*CreateTransactionResponse, error) {
 	var result createTransactionResponseData
 	err := c.put(ctx, fmt.Sprintf("plans/%s/transactions/%s", planId, txId), updateTransactionWrapper{t}, &result)
 	if err != nil {
