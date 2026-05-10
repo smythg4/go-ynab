@@ -18,7 +18,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/google/uuid"
 	"github.com/smythg4/go-ynab/ynab"
 )
 
@@ -52,7 +51,7 @@ func main() {
 
 	originals := txs[len(txs)-2:]
 	updates := make([]ynab.PatchTransaction, 0, 2)
-	oldmemos := make(map[uuid.UUID]string, 2)
+	oldmemos := make(map[string]string, 2)
 	for _, original := range originals {
 		id := original.ID
 		oldMemo := ""

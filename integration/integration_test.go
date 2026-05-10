@@ -74,16 +74,16 @@ func TestGetTransactions_DeltaRequest(t *testing.T) {
 	for _, id := range created.TransactionIDs {
 		id := id
 		t.Cleanup(func() {
-			if _, _, err := client.DeleteTransaction(ctx, planID, id); err != nil {
+			if _, _, err := client.DeleteTransaction(ctx, planID, id.String()); err != nil {
 				t.Logf("cleanup: DeleteTransaction %s: %v", id, err)
 			}
 		})
 	}
 	t.Logf("created transactions %v", created.TransactionIDs)
 
-	createdIDs := map[uuid.UUID]bool{
-		created.TransactionIDs[0]: true,
-		created.TransactionIDs[1]: true,
+	createdIDs := map[string]bool{
+		created.TransactionIDs[0].String(): true,
+		created.TransactionIDs[1].String(): true,
 	}
 
 	delta, _, err := client.GetTransactions(ctx, planID, &ynab.TransactionListParams{
@@ -220,7 +220,7 @@ func TestTransactions_CreateBatchAndUpdateBatch(t *testing.T) {
 	for _, id := range created.TransactionIDs {
 		id := id
 		t.Cleanup(func() {
-			if _, _, err := client.DeleteTransaction(ctx, planID, id); err != nil {
+			if _, _, err := client.DeleteTransaction(ctx, planID, id.String()); err != nil {
 				t.Logf("cleanup: DeleteTransaction %s: %v", id, err)
 			}
 		})

@@ -23,8 +23,12 @@ type transactionsData struct {
 }
 
 // Transaction represents a single YNAB transaction. Amounts are in milliunits (divide by 1000 for display).
+//
+// ID is a string rather than uuid.UUID because upcoming scheduled transaction instances use a
+// compound format "{scheduled_uuid}_{date}" (e.g. "abc123..._2025-06-01"). Regular posted
+// transactions have standard UUID ids.
 type Transaction struct {
-	ID                      uuid.UUID        `json:"id"`
+	ID                      string           `json:"id"`
 	Date                    Date             `json:"date"`
 	Amount                  int64            `json:"amount"`
 	Memo                    *string          `json:"memo"`
@@ -182,7 +186,7 @@ func (c *Client) GetTransactions(ctx context.Context, planId uuid.UUID, params *
 
 // GetTransaction returns a single transaction by ID.
 // The second return value is server knowledge for delta requests.
-func (c *Client) GetTransaction(ctx context.Context, planId uuid.UUID, txId uuid.UUID) (*Transaction, int64, error) {
+func (c *Client) GetTransaction(ctx context.Context, planId uuid.UUID, txId string) (*Transaction, int64, error) {
 	var result transactionData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/transactions/%s", planId, txId), nil, &result); err != nil {
 		return nil, -1, err
@@ -386,7 +390,7 @@ func (c *Client) CreateScheduledTransaction(ctx context.Context, planId uuid.UUI
 
 // DeleteTransaction deletes a transaction and returns the deleted transaction.
 // The second return value is server knowledge for delta requests.
-func (c *Client) DeleteTransaction(ctx context.Context, planId uuid.UUID, transId uuid.UUID) (*Transaction, int64, error) {
+func (c *Client) DeleteTransaction(ctx context.Context, planId uuid.UUID, transId string) (*Transaction, int64, error) {
 	var result transactionData
 	err := c.delete(ctx, fmt.Sprintf("plans/%s/transactions/%s", planId, transId), &result)
 	if err != nil {
@@ -409,7 +413,7 @@ func (c *Client) DeleteScheduledTransaction(ctx context.Context, planId uuid.UUI
 
 // UpdateTransaction is the request body for replacing a transaction (PUT). ID, AccountID, Date, and Amount are required.
 type UpdateTransaction struct {
-	ID         uuid.UUID     `json:"id"`
+	ID         string        `json:"id"`
 	AccountID  uuid.UUID     `json:"account_id"`
 	Date       Date          `json:"date"`
 	Amount     int64         `json:"amount"`
@@ -426,7 +430,7 @@ type UpdateTransaction struct {
 // PatchTransaction is the request body for partially updating a transaction (PATCH).
 // Identify the target by setting ID (a *uuid.UUID pointer) or ImportID; only non-nil fields are applied.
 type PatchTransaction struct {
-	ID         *uuid.UUID    `json:"id,omitempty"`
+	ID         *string       `json:"id,omitempty"`
 	ImportID   *string       `json:"import_id,omitempty"`
 	AccountID  *uuid.UUID    `json:"account_id,omitempty"`
 	Date       *Date         `json:"date,omitempty"`
@@ -461,7 +465,7 @@ func (c *Client) UpdateTransactions(ctx context.Context, planId uuid.UUID, t []P
 // PUT Methods and infrastructure using transactions
 
 // UpdateTransaction replaces a transaction (PUT). Use UpdateTransactions for partial batch updates.
-func (c *Client) UpdateTransaction(ctx context.Context, planId uuid.UUID, txId uuid.UUID, t UpdateTransaction) (*CreateTransactionResponse, error) {
+func (c *Client) UpdateTransaction(ctx context.Context, planId uuid.UUID, txId string, t UpdateTransaction) (*CreateTransactionResponse, error) {
 	var result createTransactionResponseData
 	err := c.put(ctx, fmt.Sprintf("plans/%s/transactions/%s", planId, txId), updateTransactionWrapper{t}, &result)
 	if err != nil {

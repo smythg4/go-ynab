@@ -33,9 +33,8 @@ func TestGetTransactions(t *testing.T) {
 		t.Fatalf("expected 1 transaction, got %d", len(txs))
 	}
 
-	idWant := uuid.MustParse("123e4567-e89b-12d3-a456-426614174001")
-	if txs[0].ID != idWant {
-		t.Errorf("got ID %v, want %v", txs[0].ID, idWant)
+	if txs[0].ID != "123e4567-e89b-12d3-a456-426614174001" {
+		t.Errorf("got ID %v, want 123e4567-e89b-12d3-a456-426614174001", txs[0].ID)
 	}
 
 	if txs[0].Amount != -15000 {
@@ -95,7 +94,7 @@ func TestGetTransactionsFilteredType(t *testing.T) {
 func TestGetTransaction(t *testing.T) {
 	client, _ := newTestClient(txSingleFixture, 200)
 
-	txID := uuid.MustParse("123e4567-e89b-12d3-a456-426614174001")
+	txID := "123e4567-e89b-12d3-a456-426614174001"
 	tx, _, err := client.GetTransaction(context.Background(), uuid.New(), txID)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -210,7 +209,7 @@ func TestGetScheduledTransaction(t *testing.T) {
 func TestDeleteTransaction(t *testing.T) {
 	client, transport := newTestClient(txSingleFixture, 200)
 
-	txID := uuid.MustParse("123e4567-e89b-12d3-a456-426614174001")
+	txID := "123e4567-e89b-12d3-a456-426614174001"
 	tx, _, err := client.DeleteTransaction(context.Background(), uuid.New(), txID)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -244,7 +243,7 @@ func TestDeleteScheduledTransaction(t *testing.T) {
 }
 
 func TestUpdateTransaction(t *testing.T) {
-	txID := uuid.MustParse("123e4567-e89b-12d3-a456-426614174001")
+	txID := "123e4567-e89b-12d3-a456-426614174001"
 	fixture := `{"data":{"transaction_ids":["123e4567-e89b-12d3-a456-426614174001"],"transaction":` + txFixture +
 		`,"duplicate_import_ids":[],"server_knowledge":10}}`
 	client, transport := newTestClient(fixture, 200)
@@ -279,6 +278,7 @@ func TestUpdateTransaction(t *testing.T) {
 	if payload.Transactions.ID != txID {
 		t.Errorf("got payload ID %v, want %v", payload.Transactions.ID, txID)
 	}
+
 }
 
 func TestUpdateScheduledTransaction(t *testing.T) {
@@ -314,7 +314,7 @@ func TestUpdateScheduledTransaction(t *testing.T) {
 }
 
 func TestCreateTransaction(t *testing.T) {
-	txID := uuid.MustParse("123e4567-e89b-12d3-a456-426614174001")
+	txID := "123e4567-e89b-12d3-a456-426614174001"
 	fixture := `{"data":{"transaction_ids":["123e4567-e89b-12d3-a456-426614174001"],"transaction":` + txFixture + `,"duplicate_import_ids":[],"server_knowledge":6}}`
 	client, transport := newTestClient(fixture, 201)
 
@@ -439,7 +439,7 @@ func TestUpdateTransactions(t *testing.T) {
 	fixture := `{"data":{"transaction_ids":["123e4567-e89b-12d3-a456-426614174001"],"transactions":[` + txFixture + `],"duplicate_import_ids":[],"server_knowledge":9}}`
 	client, transport := newTestClient(fixture, 200)
 
-	txID := uuid.MustParse("123e4567-e89b-12d3-a456-426614174001")
+	txID := "123e4567-e89b-12d3-a456-426614174001"
 	acctID := uuid.New()
 	now := Date{time.Now()}
 	amount := int64(-15000)
