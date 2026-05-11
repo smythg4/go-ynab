@@ -34,7 +34,7 @@ func TestNewClient(t *testing.T) {
 }
 
 func TestWithTimeout(t *testing.T) {
-	c := NewClient("test-token").WithTimeout(30)
+	c := NewClient("test-token").WithTimeout(30 * time.Second)
 
 	if c.httpClient.Timeout != 30*time.Second {
 		t.Errorf("got timeout %v, want 30s", c.httpClient.Timeout)

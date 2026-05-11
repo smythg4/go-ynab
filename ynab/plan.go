@@ -64,9 +64,6 @@ type PlanDetails struct {
 
 // GET Methods using plans
 
-// GetPlans returns all plans for the authenticated user. includeAccounts flag indicates
-// whether you want the returned payload to include all the account information for each
-// plan.
 func (c *Client) GetPlans(ctx context.Context, includeAccounts bool) ([]Plan, error) {
 	q := url.Values{}
 	if includeAccounts {
@@ -79,10 +76,6 @@ func (c *Client) GetPlans(ctx context.Context, includeAccounts bool) ([]Plan, er
 	return result.Data.Plans, nil
 }
 
-// GetPlan returns the full export for the given plan, including all
-// sub-resources. The second return value is server knowledge for delta requests.
-// For large plans this response can be substantial —
-// consider using specific resource endpoints for targeted queries.
 func (c *Client) GetPlan(ctx context.Context, id uuid.UUID, params *ListParams) (*PlanDetails, int64, error) {
 	var result planDetailsData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s", id), buildListParams(params), &result); err != nil {
@@ -91,10 +84,6 @@ func (c *Client) GetPlan(ctx context.Context, id uuid.UUID, params *ListParams) 
 	return &result.Data.Plan, result.Data.ServerKnowledge, nil
 }
 
-// GetLastUsedPlan returns the full export for the most recently used plan
-// for the authenticated user. Use the returned plan's ID for subsequent
-// sub-resource calls (GetAccounts, GetTransactions, etc.) — there is no
-// "last-used" shortcut for sub-resource endpoints.
 func (c *Client) GetLastUsedPlan(ctx context.Context) (*PlanDetails, error) {
 	var result planDetailsData
 	if err := c.get(ctx, "plans/last-used", nil, &result); err != nil {
@@ -103,7 +92,6 @@ func (c *Client) GetLastUsedPlan(ctx context.Context) (*PlanDetails, error) {
 	return &result.Data.Plan, nil
 }
 
-// GetPlanSettings returns the date and currency format settings for a plan.
 func (c *Client) GetPlanSettings(ctx context.Context, id uuid.UUID) (*PlanSettings, error) {
 	var result planSettingsData
 	if err := c.get(ctx, fmt.Sprintf("plans/%s/settings", id), nil, &result); err != nil {

@@ -60,19 +60,17 @@ type Account struct {
 
 // GET Methods using accounts
 
-// GetAccounts returns all accounts for a plan. The second return value is server knowledge for delta requests.
-func (c *Client) GetAccounts(ctx context.Context, planId uuid.UUID, params *ListParams) ([]Account, int64, error) {
+func (c *Client) GetAccounts(ctx context.Context, planID uuid.UUID, params *ListParams) ([]Account, int64, error) {
 	var result accountsData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/accounts", planId), buildListParams(params), &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/accounts", planID), buildListParams(params), &result); err != nil {
 		return nil, -1, err
 	}
 	return result.Data.Accounts, result.Data.ServerKnowledge, nil
 }
 
-// GetAccount returns a single account by ID.
-func (c *Client) GetAccount(ctx context.Context, planId uuid.UUID, accountId uuid.UUID) (*Account, error) {
+func (c *Client) GetAccount(ctx context.Context, planID uuid.UUID, accountID uuid.UUID) (*Account, error) {
 	var result accountData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/accounts/%s", planId, accountId), nil, &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/accounts/%s", planID, accountID), nil, &result); err != nil {
 		return nil, err
 	}
 	return &result.Data.Account, nil
@@ -91,10 +89,9 @@ type saveAccountWrapper struct {
 	Account SaveAccount `json:"account"`
 }
 
-// CreateAccount creates a new account for a plan.
-func (c *Client) CreateAccount(ctx context.Context, planId uuid.UUID, a SaveAccount) (*Account, error) {
+func (c *Client) CreateAccount(ctx context.Context, planID uuid.UUID, a SaveAccount) (*Account, error) {
 	var result accountData
-	err := c.post(ctx, fmt.Sprintf("plans/%s/accounts", planId), saveAccountWrapper{a}, &result)
+	err := c.post(ctx, fmt.Sprintf("plans/%s/accounts", planID), saveAccountWrapper{a}, &result)
 	if err != nil {
 		return nil, err
 	}

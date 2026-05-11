@@ -81,29 +81,25 @@ const (
 
 // GET Methods using categories
 
-// GetCategories returns all category groups and their categories for a plan.
-// The second return value is server knowledge for delta requests.
-func (c *Client) GetCategories(ctx context.Context, planId uuid.UUID, params *ListParams) ([]CategoryGroup, int64, error) {
+func (c *Client) GetCategories(ctx context.Context, planID uuid.UUID, params *ListParams) ([]CategoryGroup, int64, error) {
 	var result categoriesData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/categories", planId), buildListParams(params), &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/categories", planID), buildListParams(params), &result); err != nil {
 		return nil, -1, err
 	}
 	return result.Data.CategoryGroups, result.Data.ServerKnowledge, nil
 }
 
-// GetCategory returns a single category by ID.
-func (c *Client) GetCategory(ctx context.Context, planId uuid.UUID, categoryId uuid.UUID) (*Category, error) {
+func (c *Client) GetCategory(ctx context.Context, planID uuid.UUID, categoryID uuid.UUID) (*Category, error) {
 	var result categoryData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/categories/%s", planId, categoryId), nil, &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/categories/%s", planID, categoryID), nil, &result); err != nil {
 		return nil, err
 	}
 	return &result.Data.Category, nil
 }
 
-// GetCategoryForMonth returns a category's data for a specific budget month.
-func (c *Client) GetCategoryForMonth(ctx context.Context, planId uuid.UUID, month Date, categoryId uuid.UUID) (*Category, error) {
+func (c *Client) GetCategoryForMonth(ctx context.Context, planID uuid.UUID, month Date, categoryID uuid.UUID) (*Category, error) {
 	var result categoryData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/months/%s/categories/%s", planId, month, categoryId), nil, &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/months/%s/categories/%s", planID, month, categoryID), nil, &result); err != nil {
 		return nil, err
 	}
 	return &result.Data.Category, nil
@@ -126,11 +122,9 @@ type saveCategoryWrapper struct {
 	Category SaveCategory `json:"category"`
 }
 
-// CreateCategory creates a new category within a category group.
-// The second return value is server knowledge for delta requests.
-func (c *Client) CreateCategory(ctx context.Context, planId uuid.UUID, sc SaveCategory) (*Category, int64, error) {
+func (c *Client) CreateCategory(ctx context.Context, planID uuid.UUID, sc SaveCategory) (*Category, int64, error) {
 	var result categoryData
-	err := c.post(ctx, fmt.Sprintf("plans/%s/categories", planId), saveCategoryWrapper{sc}, &result)
+	err := c.post(ctx, fmt.Sprintf("plans/%s/categories", planID), saveCategoryWrapper{sc}, &result)
 	if err != nil {
 		return nil, -1, err
 	}
@@ -146,11 +140,9 @@ type saveCategoryGroupWrapper struct {
 	CategoryGroup SaveCategoryGroup `json:"category_group"`
 }
 
-// CreateCategoryGroup creates a new category group.
-// The second return value is server knowledge for delta requests.
-func (c *Client) CreateCategoryGroup(ctx context.Context, planId uuid.UUID, scg SaveCategoryGroup) (*CategoryGroup, int64, error) {
+func (c *Client) CreateCategoryGroup(ctx context.Context, planID uuid.UUID, scg SaveCategoryGroup) (*CategoryGroup, int64, error) {
 	var result categoryGroupData
-	err := c.post(ctx, fmt.Sprintf("plans/%s/category_groups", planId), saveCategoryGroupWrapper{scg}, &result)
+	err := c.post(ctx, fmt.Sprintf("plans/%s/category_groups", planID), saveCategoryGroupWrapper{scg}, &result)
 	if err != nil {
 		return nil, -1, err
 	}
@@ -159,11 +151,9 @@ func (c *Client) CreateCategoryGroup(ctx context.Context, planId uuid.UUID, scg 
 
 // PATCH Methods and infrastructure using categories
 
-// UpdateCategory updates an existing category.
-// The second return value is server knowledge for delta requests.
-func (c *Client) UpdateCategory(ctx context.Context, planId, categoryId uuid.UUID, sc SaveCategory) (*Category, int64, error) {
+func (c *Client) UpdateCategory(ctx context.Context, planID, categoryID uuid.UUID, sc SaveCategory) (*Category, int64, error) {
 	var result categoryData
-	err := c.patch(ctx, fmt.Sprintf("plans/%s/categories/%s", planId, categoryId), saveCategoryWrapper{sc}, &result)
+	err := c.patch(ctx, fmt.Sprintf("plans/%s/categories/%s", planID, categoryID), saveCategoryWrapper{sc}, &result)
 	if err != nil {
 		return nil, -1, err
 	}
@@ -179,22 +169,18 @@ type saveMonthCategoryWrapper struct {
 	Category SaveMonthCategory `json:"category"`
 }
 
-// UpdateCategoryForMonth updates a category's budgeted amount for a specific month.
-// The second return value is server knowledge for delta requests.
-func (c *Client) UpdateCategoryForMonth(ctx context.Context, planId uuid.UUID, month Date, categoryId uuid.UUID, smc SaveMonthCategory) (*Category, int64, error) {
+func (c *Client) UpdateCategoryForMonth(ctx context.Context, planID uuid.UUID, month Date, categoryID uuid.UUID, smc SaveMonthCategory) (*Category, int64, error) {
 	var result categoryData
-	err := c.patch(ctx, fmt.Sprintf("plans/%s/months/%s/categories/%s", planId, month, categoryId), saveMonthCategoryWrapper{smc}, &result)
+	err := c.patch(ctx, fmt.Sprintf("plans/%s/months/%s/categories/%s", planID, month, categoryID), saveMonthCategoryWrapper{smc}, &result)
 	if err != nil {
 		return nil, -1, err
 	}
 	return &result.Data.Category, result.Data.ServerKnowledge, nil
 }
 
-// UpdateCategoryGroup updates an existing category group.
-// The second return value is server knowledge for delta requests.
-func (c *Client) UpdateCategoryGroup(ctx context.Context, planId, categoryGroupId uuid.UUID, scg SaveCategoryGroup) (*CategoryGroup, int64, error) {
+func (c *Client) UpdateCategoryGroup(ctx context.Context, planID, categoryGroupID uuid.UUID, scg SaveCategoryGroup) (*CategoryGroup, int64, error) {
 	var result categoryGroupData
-	err := c.patch(ctx, fmt.Sprintf("plans/%s/category_groups/%s", planId, categoryGroupId), saveCategoryGroupWrapper{scg}, &result)
+	err := c.patch(ctx, fmt.Sprintf("plans/%s/category_groups/%s", planID, categoryGroupID), saveCategoryGroupWrapper{scg}, &result)
 	if err != nil {
 		return nil, -1, err
 	}

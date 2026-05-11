@@ -174,84 +174,69 @@ func buildTransactionParams(params *TransactionListParams) url.Values {
 	return q
 }
 
-// GetTransactions returns all transactions for a plan. The second return value is the server knowledge
-// for use with delta requests via TransactionListParams.LastKnowledgeOfServer.
-func (c *Client) GetTransactions(ctx context.Context, planId uuid.UUID, params *TransactionListParams) ([]Transaction, int64, error) {
+func (c *Client) GetTransactions(ctx context.Context, planID uuid.UUID, params *TransactionListParams) ([]Transaction, int64, error) {
 	var result transactionsData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/transactions", planId), buildTransactionParams(params), &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/transactions", planID), buildTransactionParams(params), &result); err != nil {
 		return nil, -1, err
 	}
 	return result.Data.Transactions, result.Data.ServerKnowledge, nil
 }
 
-// GetTransaction returns a single transaction by ID.
-// The second return value is server knowledge for delta requests.
-func (c *Client) GetTransaction(ctx context.Context, planId uuid.UUID, txId string) (*Transaction, int64, error) {
+func (c *Client) GetTransaction(ctx context.Context, planID uuid.UUID, txID string) (*Transaction, int64, error) {
 	var result transactionData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/transactions/%s", planId, txId), nil, &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/transactions/%s", planID, txID), nil, &result); err != nil {
 		return nil, -1, err
 	}
 	return &result.Data.Transaction, result.Data.ServerKnowledge, nil
 }
 
-// GetTransactionsByAccount returns all transactions for a specific account.
-// The second return value is server knowledge for delta requests.
-func (c *Client) GetTransactionsByAccount(ctx context.Context, planId uuid.UUID, accountId uuid.UUID, params *TransactionListParams) ([]Transaction, int64, error) {
+func (c *Client) GetTransactionsByAccount(ctx context.Context, planID uuid.UUID, accountID uuid.UUID, params *TransactionListParams) ([]Transaction, int64, error) {
 	q := buildTransactionParams(params)
 	var result transactionsData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/accounts/%s/transactions", planId, accountId), q, &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/accounts/%s/transactions", planID, accountID), q, &result); err != nil {
 		return nil, -1, err
 	}
 	return result.Data.Transactions, result.Data.ServerKnowledge, nil
 }
 
-// GetTransactionsByCategory returns all transactions for a specific category.
-// The second return value is server knowledge for delta requests.
-func (c *Client) GetTransactionsByCategory(ctx context.Context, planId uuid.UUID, categoryId uuid.UUID, params *TransactionListParams) ([]Transaction, int64, error) {
+func (c *Client) GetTransactionsByCategory(ctx context.Context, planID uuid.UUID, categoryID uuid.UUID, params *TransactionListParams) ([]Transaction, int64, error) {
 	q := buildTransactionParams(params)
 	var result transactionsData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/categories/%s/transactions", planId, categoryId), q, &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/categories/%s/transactions", planID, categoryID), q, &result); err != nil {
 		return nil, -1, err
 	}
 	return result.Data.Transactions, result.Data.ServerKnowledge, nil
 }
 
-// GetTransactionsByPayee returns all transactions for a specific payee.
-// The second return value is server knowledge for delta requests.
-func (c *Client) GetTransactionsByPayee(ctx context.Context, planId uuid.UUID, payeeId uuid.UUID, params *TransactionListParams) ([]Transaction, int64, error) {
+func (c *Client) GetTransactionsByPayee(ctx context.Context, planID uuid.UUID, payeeID uuid.UUID, params *TransactionListParams) ([]Transaction, int64, error) {
 	q := buildTransactionParams(params)
 	var result transactionsData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/payees/%s/transactions", planId, payeeId), q, &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/payees/%s/transactions", planID, payeeID), q, &result); err != nil {
 		return nil, -1, err
 	}
 	return result.Data.Transactions, result.Data.ServerKnowledge, nil
 }
 
-// GetTransactionsByMonth returns all transactions for a specific budget month.
-// The second return value is server knowledge for delta requests.
-func (c *Client) GetTransactionsByMonth(ctx context.Context, planId uuid.UUID, month Date, params *TransactionListParams) ([]Transaction, int64, error) {
+func (c *Client) GetTransactionsByMonth(ctx context.Context, planID uuid.UUID, month Date, params *TransactionListParams) ([]Transaction, int64, error) {
 	q := buildTransactionParams(params)
 	var result transactionsData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/months/%s/transactions", planId, month), q, &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/months/%s/transactions", planID, month), q, &result); err != nil {
 		return nil, -1, err
 	}
 	return result.Data.Transactions, result.Data.ServerKnowledge, nil
 }
 
-// GetScheduledTransactions returns all scheduled transactions for a plan.
-// The second return value is server knowledge for delta requests.
-func (c *Client) GetScheduledTransactions(ctx context.Context, planId uuid.UUID, params *ListParams) ([]ScheduledTransaction, int64, error) {
+func (c *Client) GetScheduledTransactions(ctx context.Context, planID uuid.UUID, params *ListParams) ([]ScheduledTransaction, int64, error) {
 	var result scheduledTransactionsData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/scheduled_transactions", planId), buildListParams(params), &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/scheduled_transactions", planID), buildListParams(params), &result); err != nil {
 		return nil, -1, err
 	}
 	return result.Data.ScheduledTransactions, result.Data.ServerKnowledge, nil
 }
 
-// GetScheduledTransaction returns a single scheduled transaction by ID.
-func (c *Client) GetScheduledTransaction(ctx context.Context, planId, txId uuid.UUID) (*ScheduledTransaction, error) {
+func (c *Client) GetScheduledTransaction(ctx context.Context, planID, txID uuid.UUID) (*ScheduledTransaction, error) {
 	var result scheduledTransactionData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/scheduled_transactions/%s", planId, txId), nil, &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/scheduled_transactions/%s", planID, txID), nil, &result); err != nil {
 		return nil, err
 	}
 	return &result.Data.ScheduledTransaction, nil
@@ -317,20 +302,18 @@ type CreateTransactionsResponse struct {
 	ServerKnowledge    int64         `json:"server_knowledge"`
 }
 
-// CreateTransaction creates a single transaction.
-func (c *Client) CreateTransaction(ctx context.Context, planId uuid.UUID, t SaveTransaction) (*CreateTransactionResponse, error) {
+func (c *Client) CreateTransaction(ctx context.Context, planID uuid.UUID, t SaveTransaction) (*CreateTransactionResponse, error) {
 	var result createTransactionResponseData
-	err := c.post(ctx, fmt.Sprintf("plans/%s/transactions", planId), saveTransactionWrapper{t}, &result)
+	err := c.post(ctx, fmt.Sprintf("plans/%s/transactions", planID), saveTransactionWrapper{t}, &result)
 	if err != nil {
 		return nil, err
 	}
 	return &result.Data, nil
 }
 
-// CreateTransactions creates multiple transactions in a single request.
-func (c *Client) CreateTransactions(ctx context.Context, planId uuid.UUID, t []SaveTransaction) (*CreateTransactionsResponse, error) {
+func (c *Client) CreateTransactions(ctx context.Context, planID uuid.UUID, t []SaveTransaction) (*CreateTransactionsResponse, error) {
 	var result createTransactionsResponseData
-	err := c.post(ctx, fmt.Sprintf("plans/%s/transactions", planId), saveTransactionsWrapper{t}, &result)
+	err := c.post(ctx, fmt.Sprintf("plans/%s/transactions", planID), saveTransactionsWrapper{t}, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -347,11 +330,10 @@ type ImportTransactionsResponse struct {
 	ServerKnowledge int64       `json:"server_knowledge"`
 }
 
-// ImportTransactions triggers an import of transactions from linked accounts. Returns the IDs of imported transactions.
-func (c *Client) ImportTransactions(ctx context.Context, planId uuid.UUID) (*ImportTransactionsResponse,
+func (c *Client) ImportTransactions(ctx context.Context, planID uuid.UUID) (*ImportTransactionsResponse,
 	error) {
 	var result importTransactionsResponseData
-	err := c.post(ctx, fmt.Sprintf("plans/%s/transactions/import", planId), struct{}{}, &result)
+	err := c.post(ctx, fmt.Sprintf("plans/%s/transactions/import", planID), struct{}{}, &result)
 	if err != nil {
 		return nil, err
 	}
@@ -375,10 +357,9 @@ type saveScheduledTransactionWrapper struct {
 	Transaction SaveScheduledTransaction `json:"scheduled_transaction"`
 }
 
-// CreateScheduledTransaction creates a new scheduled transaction.
-func (c *Client) CreateScheduledTransaction(ctx context.Context, planId uuid.UUID, st SaveScheduledTransaction) (*ScheduledTransaction, error) {
+func (c *Client) CreateScheduledTransaction(ctx context.Context, planID uuid.UUID, st SaveScheduledTransaction) (*ScheduledTransaction, error) {
 	var result scheduledTransactionData
-	err := c.post(ctx, fmt.Sprintf("plans/%s/scheduled_transactions", planId),
+	err := c.post(ctx, fmt.Sprintf("plans/%s/scheduled_transactions", planID),
 		saveScheduledTransactionWrapper{st}, &result)
 	if err != nil {
 		return nil, err
@@ -388,21 +369,18 @@ func (c *Client) CreateScheduledTransaction(ctx context.Context, planId uuid.UUI
 
 // DELETE Methods and infrastructure using transactions
 
-// DeleteTransaction deletes a transaction and returns the deleted transaction.
-// The second return value is server knowledge for delta requests.
-func (c *Client) DeleteTransaction(ctx context.Context, planId uuid.UUID, transId string) (*Transaction, int64, error) {
+func (c *Client) DeleteTransaction(ctx context.Context, planID uuid.UUID, transID string) (*Transaction, int64, error) {
 	var result transactionData
-	err := c.delete(ctx, fmt.Sprintf("plans/%s/transactions/%s", planId, transId), &result)
+	err := c.delete(ctx, fmt.Sprintf("plans/%s/transactions/%s", planID, transID), &result)
 	if err != nil {
 		return nil, -1, err
 	}
 	return &result.Data.Transaction, result.Data.ServerKnowledge, nil
 }
 
-// DeleteScheduledTransaction deletes a scheduled transaction and returns the deleted record and server knowledge.
-func (c *Client) DeleteScheduledTransaction(ctx context.Context, planId uuid.UUID, transId uuid.UUID) (*ScheduledTransaction, int64, error) {
+func (c *Client) DeleteScheduledTransaction(ctx context.Context, planID uuid.UUID, transID uuid.UUID) (*ScheduledTransaction, int64, error) {
 	var result scheduledTransactionData
-	err := c.delete(ctx, fmt.Sprintf("plans/%s/scheduled_transactions/%s", planId, transId), &result)
+	err := c.delete(ctx, fmt.Sprintf("plans/%s/scheduled_transactions/%s", planID, transID), &result)
 	if err != nil {
 		return nil, -1, err
 	}
@@ -451,10 +429,9 @@ type updateTransactionWrapper struct {
 	Transactions UpdateTransaction `json:"transaction"`
 }
 
-// UpdateTransactions applies partial updates to multiple transactions (PATCH).
-func (c *Client) UpdateTransactions(ctx context.Context, planId uuid.UUID, t []PatchTransaction) (*CreateTransactionsResponse, error) {
+func (c *Client) UpdateTransactions(ctx context.Context, planID uuid.UUID, t []PatchTransaction) (*CreateTransactionsResponse, error) {
 	var result createTransactionsResponseData
-	err := c.patch(ctx, fmt.Sprintf("plans/%s/transactions", planId), patchTransactionsWrapper{t},
+	err := c.patch(ctx, fmt.Sprintf("plans/%s/transactions", planID), patchTransactionsWrapper{t},
 		&result)
 	if err != nil {
 		return nil, err
@@ -464,20 +441,18 @@ func (c *Client) UpdateTransactions(ctx context.Context, planId uuid.UUID, t []P
 
 // PUT Methods and infrastructure using transactions
 
-// UpdateTransaction replaces a transaction (PUT). Use UpdateTransactions for partial batch updates.
-func (c *Client) UpdateTransaction(ctx context.Context, planId uuid.UUID, txId string, t UpdateTransaction) (*CreateTransactionResponse, error) {
+func (c *Client) UpdateTransaction(ctx context.Context, planID uuid.UUID, txID string, t UpdateTransaction) (*CreateTransactionResponse, error) {
 	var result createTransactionResponseData
-	err := c.put(ctx, fmt.Sprintf("plans/%s/transactions/%s", planId, txId), updateTransactionWrapper{t}, &result)
+	err := c.put(ctx, fmt.Sprintf("plans/%s/transactions/%s", planID, txID), updateTransactionWrapper{t}, &result)
 	if err != nil {
 		return nil, err
 	}
 	return &result.Data, nil
 }
 
-// UpdateScheduledTransaction replaces a scheduled transaction (PUT).
-func (c *Client) UpdateScheduledTransaction(ctx context.Context, planId uuid.UUID, txId uuid.UUID, t SaveScheduledTransaction) (*ScheduledTransaction, error) {
+func (c *Client) UpdateScheduledTransaction(ctx context.Context, planID uuid.UUID, txID uuid.UUID, t SaveScheduledTransaction) (*ScheduledTransaction, error) {
 	var result scheduledTransactionData
-	err := c.put(ctx, fmt.Sprintf("plans/%s/scheduled_transactions/%s", planId, txId), saveScheduledTransactionWrapper{t}, &result)
+	err := c.put(ctx, fmt.Sprintf("plans/%s/scheduled_transactions/%s", planID, txID), saveScheduledTransactionWrapper{t}, &result)
 	if err != nil {
 		return nil, err
 	}

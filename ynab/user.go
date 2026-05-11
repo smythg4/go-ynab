@@ -19,7 +19,6 @@ type User struct {
 
 // GET Methods using user
 
-// GetUser returns the authenticated user.
 func (c *Client) GetUser(ctx context.Context) (*User, error) {
 	var result userData
 	if err := c.get(ctx, "user", nil, &result); err != nil {

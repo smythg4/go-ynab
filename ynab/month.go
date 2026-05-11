@@ -35,20 +35,17 @@ type Month struct {
 
 // GET Methods using months
 
-// GetMonths returns all budget months for a plan.
-// The second return value is server knowledge for delta requests.
-func (c *Client) GetMonths(ctx context.Context, planId uuid.UUID, params *ListParams) ([]Month, int64, error) {
+func (c *Client) GetMonths(ctx context.Context, planID uuid.UUID, params *ListParams) ([]Month, int64, error) {
 	var result monthsData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/months", planId), buildListParams(params), &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/months", planID), buildListParams(params), &result); err != nil {
 		return nil, -1, err
 	}
 	return result.Data.Months, result.Data.ServerKnowledge, nil
 }
 
-// GetMonth returns a single budget month including its category details.
-func (c *Client) GetMonth(ctx context.Context, planId uuid.UUID, month Date) (*Month, error) {
+func (c *Client) GetMonth(ctx context.Context, planID uuid.UUID, month Date) (*Month, error) {
 	var result monthData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/months/%s", planId, month), nil, &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/months/%s", planID, month), nil, &result); err != nil {
 		return nil, err
 	}
 	return &result.Data.Month, nil

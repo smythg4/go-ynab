@@ -30,14 +30,15 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/smythg4/go-ynab/ynab"
 )
 
 func main() {
-	client := ynab.NewClient(os.Getenv("YNAB_TOKEN"))
+	client := ynab.NewClient(os.Getenv("YNAB_TOKEN")).WithTimeout(2 * time.Second)
 
-	plans, err := client.GetPlans(context.Background(), true) // include account information in the return
+	plans, err := client.GetPlans(context.Background(), true)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -72,7 +73,7 @@ Rate limiting is opt-in. Omit `WithRateLimit` for scripts or one-off tools where
 The default request timeout is 10 seconds. Use `WithTimeout` to override it:
 
 ```go
-client := ynab.NewClient(os.Getenv("YNAB_TOKEN")).WithTimeout(30)
+client := ynab.NewClient(os.Getenv("YNAB_TOKEN")).WithTimeout(30 * time.Second)
 ```
 
 Both methods return the client, so they can be chained:
@@ -80,7 +81,7 @@ Both methods return the client, so they can be chained:
 ```go
 client := ynab.NewClient(os.Getenv("YNAB_TOKEN")).
     WithRateLimit(200, 10).
-    WithTimeout(30)
+    WithTimeout(30 * time.Second)
 ```
 
 ## Error Handling
@@ -88,7 +89,7 @@ client := ynab.NewClient(os.Getenv("YNAB_TOKEN")).
 Errors from the API are returned as typed errors that can be inspected with `errors.As`:
 
 ```go
-plan, err := client.GetPlan(ctx, id)
+plan, err := client.GetPlan(ctx, id, nil)
 if err != nil {
     var notFound ynab.ErrNotFound
     if errors.As(err, &notFound) {

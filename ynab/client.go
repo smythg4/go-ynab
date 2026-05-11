@@ -23,7 +23,7 @@ func (t *authTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	return t.base.RoundTrip(req)
 }
 
-// Client is the YNAB API client. Use NewClient to create one.
+// Client is the YNAB API client. Use NewClient to create one. Client implements the API interface.
 type Client struct {
 	baseURL    string
 	httpClient *http.Client
@@ -62,9 +62,9 @@ func (c *Client) WithRateLimit(requestsPerHour, burstVolume int) *Client {
 	return c
 }
 
-// WithTimeout sets the HTTP client timeout in seconds. Defaults to 10 seconds.
-func (c *Client) WithTimeout(timeoutSeconds int) *Client {
-	c.httpClient.Timeout = time.Duration(timeoutSeconds) * time.Second
+// WithTimeout sets the HTTP client timeout. Defaults to 10 seconds.
+func (c *Client) WithTimeout(timeout time.Duration) *Client {
+	c.httpClient.Timeout = timeout
 	return c
 }
 

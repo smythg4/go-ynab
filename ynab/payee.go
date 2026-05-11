@@ -52,46 +52,41 @@ type PayeeLocation struct {
 
 // GET Methods using payees
 
-// GetPayees returns all payees for a plan. The second return value is server knowledge for delta requests.
-func (c *Client) GetPayees(ctx context.Context, planId uuid.UUID, params *ListParams) ([]Payee, int64, error) {
+func (c *Client) GetPayees(ctx context.Context, planID uuid.UUID, params *ListParams) ([]Payee, int64, error) {
 	var result payeesData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/payees", planId), buildListParams(params), &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/payees", planID), buildListParams(params), &result); err != nil {
 		return nil, -1, err
 	}
 	return result.Data.Payees, result.Data.ServerKnowledge, nil
 }
 
-// GetPayee returns a single payee by ID.
-func (c *Client) GetPayee(ctx context.Context, planId, payeeId uuid.UUID) (*Payee, error) {
+func (c *Client) GetPayee(ctx context.Context, planID, payeeID uuid.UUID) (*Payee, error) {
 	var result payeeData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/payees/%s", planId, payeeId), nil, &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/payees/%s", planID, payeeID), nil, &result); err != nil {
 		return nil, err
 	}
 	return &result.Data.Payee, nil
 }
 
-// GetPayeeLocations returns all locations associated with a plan.
-func (c *Client) GetPayeeLocations(ctx context.Context, planId uuid.UUID) ([]PayeeLocation, error) {
+func (c *Client) GetPayeeLocations(ctx context.Context, planID uuid.UUID) ([]PayeeLocation, error) {
 	var result payeeLocationsData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/payee_locations", planId), nil, &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/payee_locations", planID), nil, &result); err != nil {
 		return nil, err
 	}
 	return result.Data.PayeeLocations, nil
 }
 
-// GetPayeeLocationsByPayee returns all locations associated with a specific payee.
-func (c *Client) GetPayeeLocationsByPayee(ctx context.Context, planId, payeeId uuid.UUID) ([]PayeeLocation, error) {
+func (c *Client) GetPayeeLocationsByPayee(ctx context.Context, planID, payeeID uuid.UUID) ([]PayeeLocation, error) {
 	var result payeeLocationsData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/payees/%s/payee_locations", planId, payeeId), nil, &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/payees/%s/payee_locations", planID, payeeID), nil, &result); err != nil {
 		return nil, err
 	}
 	return result.Data.PayeeLocations, nil
 }
 
-// GetPayeeLocation returns the location by ID
-func (c *Client) GetPayeeLocation(ctx context.Context, planId, locationId uuid.UUID) (*PayeeLocation, error) {
+func (c *Client) GetPayeeLocation(ctx context.Context, planID, locationID uuid.UUID) (*PayeeLocation, error) {
 	var result payeeLocationData
-	if err := c.get(ctx, fmt.Sprintf("plans/%s/payee_locations/%s", planId, locationId), nil, &result); err != nil {
+	if err := c.get(ctx, fmt.Sprintf("plans/%s/payee_locations/%s", planID, locationID), nil, &result); err != nil {
 		return nil, err
 	}
 	return &result.Data.PayeeLocation, nil
@@ -108,11 +103,9 @@ type postPayeeWrapper struct {
 	Payee PostPayee `json:"payee"`
 }
 
-// CreatePayee creates a new payee.
-// The second return value is server knowledge for delta requests.
-func (c *Client) CreatePayee(ctx context.Context, planId uuid.UUID, pp PostPayee) (*Payee, int64, error) {
+func (c *Client) CreatePayee(ctx context.Context, planID uuid.UUID, pp PostPayee) (*Payee, int64, error) {
 	var result payeeData
-	err := c.post(ctx, fmt.Sprintf("plans/%s/payees", planId), postPayeeWrapper{pp}, &result)
+	err := c.post(ctx, fmt.Sprintf("plans/%s/payees", planID), postPayeeWrapper{pp}, &result)
 	if err != nil {
 		return nil, -1, err
 	}
@@ -121,11 +114,9 @@ func (c *Client) CreatePayee(ctx context.Context, planId uuid.UUID, pp PostPayee
 
 // PATCH Methods and infrastructure using payees
 
-// UpdatePayee updates an existing payee.
-// The second return value is server knowledge for delta requests.
-func (c *Client) UpdatePayee(ctx context.Context, planId, payeeId uuid.UUID, pp PostPayee) (*Payee, int64, error) {
+func (c *Client) UpdatePayee(ctx context.Context, planID, payeeID uuid.UUID, pp PostPayee) (*Payee, int64, error) {
 	var result payeeData
-	err := c.patch(ctx, fmt.Sprintf("plans/%s/payees/%s", planId, payeeId), postPayeeWrapper{pp}, &result)
+	err := c.patch(ctx, fmt.Sprintf("plans/%s/payees/%s", planID, payeeID), postPayeeWrapper{pp}, &result)
 	if err != nil {
 		return nil, -1, err
 	}
