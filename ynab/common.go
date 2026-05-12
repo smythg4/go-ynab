@@ -5,11 +5,19 @@ import (
 	"net/url"
 )
 
+// TransactionType represents the type of transactions you want to filter for.
+type TransactionType string
+
+const (
+	TransactionUnapproved    TransactionType = "unapproved"
+	TransactionUncategorized TransactionType = "uncategorized"
+)
+
 // TransactionListParams holds optional filter parameters for transaction list endpoints.
 type TransactionListParams struct {
-	SinceDate             *Date   // only return transactions on or after this date
-	Type                  *string // filter by "uncategorized" or "unapproved"
-	LastKnowledgeOfServer *int64  // for delta requests; pass the value returned by a prior call
+	SinceDate             *Date            // only return transactions on or after this date
+	Type                  *TransactionType // filter by "uncategorized" or "unapproved"
+	LastKnowledgeOfServer *int64           // for delta requests; pass the value returned by a prior call
 }
 
 // ListParams holds optional filter parameters for list endpoints that support delta requests.

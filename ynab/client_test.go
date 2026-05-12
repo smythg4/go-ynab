@@ -42,7 +42,10 @@ func TestWithTimeout(t *testing.T) {
 }
 
 func TestWithRateLimit(t *testing.T) {
-	c := NewClient("test-token").WithRateLimit(200, 10)
+	c, err := NewClient("test-token").WithRateLimit(200, 10)
+	if err != nil {
+		t.Error(err)
+	}
 
 	if c.limiter == nil {
 		t.Error("expected limiter to be set, got nil")

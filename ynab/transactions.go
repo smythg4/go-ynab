@@ -165,7 +165,7 @@ func buildTransactionParams(params *TransactionListParams) url.Values {
 			q.Set("since_date", params.SinceDate.String())
 		}
 		if params.Type != nil {
-			q.Set("type", *params.Type)
+			q.Set("type", string(*params.Type))
 		}
 		if params.LastKnowledgeOfServer != nil {
 			q.Set("last_knowledge_of_server", fmt.Sprintf("%d", *params.LastKnowledgeOfServer))

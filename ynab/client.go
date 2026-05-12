@@ -56,11 +56,14 @@ func NewClient(apiKey string) *Client {
 // 190 requests per hour — keeping total consumption safely under 200.
 //
 //	client := ynab.NewClient(apiKey).WithRateLimit(200, 10)
-func (c *Client) WithRateLimit(requestsPerHour, burstVolume int) *Client {
+func (c *Client) WithRateLimit(requestsPerHour, burstVolume int) (*Client, error) {
+	if burstVolume >= requestsPerHour {
+		return nil, fmt.Errorf("burstVolume (%d) must be less than requestsPerHour (%d)", burstVolume, requestsPerHour)
+	}
 	effectiveRate := requestsPerHour - burstVolume
 	interval := time.Hour / time.Duration(effectiveRate)
 	c.limiter = rate.NewLimiter(rate.Every(interval), burstVolume)
-	return c
+	return c, nil
 }
 
 // WithTimeout sets the HTTP client timeout. Defaults to 10 seconds.

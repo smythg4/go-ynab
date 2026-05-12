@@ -79,7 +79,7 @@ func TestGetTransactionsFilteredServerKnowledge(t *testing.T) {
 func TestGetTransactionsFilteredType(t *testing.T) {
 	client, transport := newTestClient(txListFixture, 200)
 
-	ttype := "unapproved"
+	ttype := TransactionUnapproved
 	params := TransactionListParams{Type: &ttype}
 	_, _, err := client.GetTransactions(context.Background(), uuid.New(), &params)
 	if err != nil {
