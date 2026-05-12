@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -75,8 +76,7 @@ func (c *Client) WithTransport(t http.RoundTripper) *Client {
 	return c
 }
 
-// Generic method for issuing GET requests, used for endpoint logic
-func (c *Client) get(ctx context.Context, endpoint string, params url.Values, out any) error {
+func (c *Client) do(ctx context.Context, method string, endpoint string, params url.Values, body io.Reader, out any) error {
 	if c.limiter != nil {
 		if err := c.limiter.Wait(ctx); err != nil {
 			return err
@@ -86,9 +86,13 @@ func (c *Client) get(ctx context.Context, endpoint string, params url.Values, ou
 	if len(params) > 0 {
 		url += "?" + params.Encode()
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, method, url, body)
 	if err != nil {
 		return err
+	}
+
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
 	}
 
 	res, err := c.httpClient.Do(req)
@@ -97,7 +101,7 @@ func (c *Client) get(ctx context.Context, endpoint string, params url.Values, ou
 	}
 	defer res.Body.Close()
 
-	if res.StatusCode != http.StatusOK {
+	if res.StatusCode > 299 || res.StatusCode < 200 {
 		var apiErr errorData
 		if err := json.NewDecoder(res.Body).Decode(&apiErr); err != nil {
 			return fmt.Errorf("request failed with status %d", res.StatusCode)
@@ -106,141 +110,41 @@ func (c *Client) get(ctx context.Context, endpoint string, params url.Values, ou
 	}
 
 	return json.NewDecoder(res.Body).Decode(out)
+}
+
+// Generic method for issuing GET requests, used for endpoint logic
+func (c *Client) get(ctx context.Context, endpoint string, params url.Values, out any) error {
+	return c.do(ctx, http.MethodGet, endpoint, params, nil, out)
 }
 
 // Generic method for issuing POST requests, used for endpoint logic
 func (c *Client) post(ctx context.Context, endpoint string, payload any, out any) error {
-	if c.limiter != nil {
-		if err := c.limiter.Wait(ctx); err != nil {
-			return err
-		}
-	}
-	url := fmt.Sprintf("%s/%s", c.baseURL, endpoint)
 	body, err := json.Marshal(payload)
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	res, err := c.httpClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode != http.StatusCreated && res.StatusCode != http.StatusOK {
-		var apiErr errorData
-		if err := json.NewDecoder(res.Body).Decode(&apiErr); err != nil {
-			return fmt.Errorf("request failed with status %d", res.StatusCode)
-		}
-		return newAPIError(res.StatusCode, apiErr.Error)
-	}
-
-	return json.NewDecoder(res.Body).Decode(out)
+	return c.do(ctx, http.MethodPost, endpoint, nil, bytes.NewReader(body), out)
 }
 
 // Generic method for issuing DELETE requests, used for endpoint logic
 func (c *Client) delete(ctx context.Context, endpoint string, out any) error {
-	if c.limiter != nil {
-		if err := c.limiter.Wait(ctx); err != nil {
-			return err
-		}
-	}
-	url := fmt.Sprintf("%s/%s", c.baseURL, endpoint)
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, url, nil)
-	if err != nil {
-		return err
-	}
-
-	res, err := c.httpClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode != http.StatusOK {
-		var apiErr errorData
-		if err := json.NewDecoder(res.Body).Decode(&apiErr); err != nil {
-			return fmt.Errorf("request failed with status %d", res.StatusCode)
-		}
-		return newAPIError(res.StatusCode, apiErr.Error)
-	}
-
-	return json.NewDecoder(res.Body).Decode(out)
+	return c.do(ctx, http.MethodDelete, endpoint, nil, nil, out)
 }
 
 // Generic method for issuing PATCH requests, used for endpoint logic
 func (c *Client) patch(ctx context.Context, endpoint string, payload any, out any) error {
-	if c.limiter != nil {
-		if err := c.limiter.Wait(ctx); err != nil {
-			return err
-		}
-	}
-	url := fmt.Sprintf("%s/%s", c.baseURL, endpoint)
 	body, err := json.Marshal(payload)
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, url, bytes.NewReader(body))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	res, err := c.httpClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	// YNAB uses the unsupported http status code 209 for some PATCH responses
-	if res.StatusCode != http.StatusOK && res.StatusCode != 209 {
-		var apiErr errorData
-		if err := json.NewDecoder(res.Body).Decode(&apiErr); err != nil {
-			return fmt.Errorf("request failed with status %d", res.StatusCode)
-		}
-		return newAPIError(res.StatusCode, apiErr.Error)
-	}
-
-	return json.NewDecoder(res.Body).Decode(out)
+	return c.do(ctx, http.MethodPatch, endpoint, nil, bytes.NewReader(body), out)
 }
 
 // Generic method for issuing PUT requests, used for endpoint logic
 func (c *Client) put(ctx context.Context, endpoint string, payload any, out any) error {
-	if c.limiter != nil {
-		if err := c.limiter.Wait(ctx); err != nil {
-			return err
-		}
-	}
-	url := fmt.Sprintf("%s/%s", c.baseURL, endpoint)
 	body, err := json.Marshal(payload)
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPut, url, bytes.NewReader(body))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	res, err := c.httpClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode != http.StatusOK {
-		var apiErr errorData
-		if err := json.NewDecoder(res.Body).Decode(&apiErr); err != nil {
-			return fmt.Errorf("request failed with status %d", res.StatusCode)
-		}
-		return newAPIError(res.StatusCode, apiErr.Error)
-	}
-
-	return json.NewDecoder(res.Body).Decode(out)
+	return c.do(ctx, http.MethodPut, endpoint, nil, bytes.NewReader(body), out)
 }
