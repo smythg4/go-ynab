@@ -121,6 +121,7 @@ type ScheduledTransaction struct {
 	CategoryName      *string                   `json:"category_name"`
 	Subtransactions   []ScheduledSubtransaction `json:"subtransactions"`
 	TransferAccountID *uuid.UUID                `json:"transfer_account_id"`
+	Deleted           bool                      `json:"deleted"`
 }
 
 // ScheduledSubtransaction is a line item within a split scheduled transaction.
